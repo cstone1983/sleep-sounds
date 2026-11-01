@@ -32,7 +32,6 @@ sealed interface Route {
   data object NowPlaying : Route
   data object NightDim : Route
   data object Breathe : Route
-  data object Connections : Route
 }
 
 @Composable
@@ -89,11 +88,8 @@ fun NightfallApp(start: Route = Route.Main(Tab.TONIGHT), previewState: PlayState
                   onDelete = { store.deleteMix(it.id) },
                 )
                 Tab.MEDITATE -> MeditateScreen(onBreathe = { go(Route.Breathe) })
-                Tab.ROUTINE -> RoutineScreen(
-                  mix = store.tonightMix(),
-                  tonight = tonight,
-                  onConnections = { go(Route.Connections) },
-                )
+                Tab.ROUTINE -> RoutineScreen(mix = store.tonightMix(), tonight = tonight)
+                Tab.SETTINGS -> SettingsScreen()
               }
             }
             BottomTabs(route.tab, ::pickTab)
@@ -133,7 +129,6 @@ fun NightfallApp(start: Route = Route.Main(Tab.TONIGHT), previewState: PlayState
           )
           Route.NightDim -> NightDimScreen(state = state, onWake = ::back)
           Route.Breathe -> BreatheScreen(onBack = ::back)
-          Route.Connections -> ConnectionsScreen(onBack = ::back)
         }
       }
     }

@@ -1,6 +1,7 @@
 package com.cstone.nightfall
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -51,7 +52,7 @@ class ScreensTest {
   @Test fun nowPlaying() = shot("now-playing", Route.NowPlaying, PLAYING)
   @Test fun nightDim() = shot("night-dim", Route.NightDim, PLAYING)
   @Test fun breathe() = shot("breathe", Route.Breathe)
-  @Test fun connections() = shot("connections", Route.Connections)
+  @Test fun settings() = shot("settings", Route.Main(Tab.SETTINGS))
 
   @Test
   fun mixerOpensAndTilesToggle() {
@@ -89,10 +90,23 @@ class ScreensTest {
     compose.onNodeWithText("Routine").performClick()
     compose.waitForIdle()
     compose.onNodeWithText("Ready check").assertIsDisplayed()
-    compose.onNodeWithText("Connections").performClick()
+    compose.onNodeWithText("Settings").performClick()
     compose.waitForIdle()
-    compose.onNodeWithContentDescription("Back").performClick()
+    compose.onNodeWithText("Test n8n").assertExists()
+  }
+
+  @Test
+  fun infoPopupsExplainEachConnection() {
+    compose.setContent { NightfallApp(start = Route.Main(Tab.SETTINGS)) }
+    compose.onNodeWithContentDescription("How to connect Home Assistant").performClick()
     compose.waitForIdle()
-    compose.onNodeWithText("Ready check").assertIsDisplayed()
+    compose.onNodeWithText("Connect Home Assistant").assertIsDisplayed()
+    compose.onNode(isDialog()).captureRoboImage("$OUT/help-ha.png")
+    compose.onNodeWithText("Close").performClick()
+    compose.waitForIdle()
+    compose.onNodeWithContentDescription("How to connect n8n").performClick()
+    compose.waitForIdle()
+    compose.onNodeWithText("Connect n8n").assertIsDisplayed()
+    compose.onNode(isDialog()).captureRoboImage("$OUT/help-n8n.png")
   }
 }

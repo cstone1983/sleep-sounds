@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -161,7 +162,7 @@ fun askToRemoveBatteryLimits(context: Context) {
 }
 
 @Composable
-fun RoutineScreen(mix: Mix, tonight: Tonight, onConnections: () -> Unit) {
+fun RoutineScreen(mix: Mix, tonight: Tonight) {
   val context = LocalContext.current
   val refresh = remember { mutableIntStateOf(0) }
   LaunchedEffect(Unit) {
@@ -180,7 +181,7 @@ fun RoutineScreen(mix: Mix, tonight: Tonight, onConnections: () -> Unit) {
     verticalArrangement = Arrangement.spacedBy(12.dp),
   ) {
     Text("Routine", style = style(28, FontWeight.ExtraBold))
-    Text("Your automation decides when sound starts. This is what it will play.", style = style(14, color = Muted))
+    Text("Home Assistant or n8n decides when sound starts. This is what it will play. Set up connections in Settings.", style = style(14, color = Muted))
     Card(Modifier.fillMaxWidth()) {
       Fact("Plays", mix.name)
       Fact("For", if (tonight.minutes == 0) "All night" else "${minutesLabel(tonight.minutes)}, ${tonight.fadeMinutes} min fade")
@@ -193,7 +194,6 @@ fun RoutineScreen(mix: Mix, tonight: Tonight, onConnections: () -> Unit) {
       Fact("Last automatic start", last.ifEmpty { "None yet" })
     }
     if (!background) PrimaryButton("Allow background start") { askToRemoveBatteryLimits(context) }
-    OutlineButton("Connections", onClick = onConnections)
     OutlineButton("Play a 15 second test") { Player.start(context, 15) }
   }
 }
@@ -214,24 +214,20 @@ private fun Check(text: String, ok: Boolean) {
   }
 }
 
+private enum class Help { HOME_ASSISTANT, N8N }
+
+/** Connections live here so any setup can use them. Every field saves as it's typed. */
 @Composable
-fun ConnectionsScreen(onBack: () -> Unit) {
+fun SettingsScreen() {
   val context = LocalContext.current
   var haUrl by remember { mutableStateOf(Connections.get(context, Connections.HA_URL)) }
   var haWebhook by remember { mutableStateOf(Connections.get(context, Connections.HA_WEBHOOK)) }
   var n8nUrl by remember { mutableStateOf(Connections.get(context, Connections.N8N_URL)) }
   var n8nHeader by remember { mutableStateOf(Connections.get(context, Connections.N8N_HEADER)) }
   var n8nValue by remember { mutableStateOf(Connections.get(context, Connections.N8N_VALUE)) }
-  fun save() {
-    Connections.set(context, Connections.HA_URL, haUrl)
-    Connections.set(context, Connections.HA_WEBHOOK, haWebhook)
-    Connections.set(context, Connections.N8N_URL, n8nUrl)
-    Connections.set(context, Connections.N8N_HEADER, n8nHeader)
-    Connections.set(context, Connections.N8N_VALUE, n8nValue)
-  }
+  var help by remember { mutableStateOf<Help?>(null) }
   fun toast(text: String) = Toast.makeText(context, text, Toast.LENGTH_LONG).show()
   fun test(target: Target?) {
-    save()
     if (target == null) {
       toast("Fill in the details first")
       return
@@ -247,33 +243,103 @@ fun ConnectionsScreen(onBack: () -> Unit) {
     toast("Copied")
   }
   Column(
-    Modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp),
+    Modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 16.dp),
     verticalArrangement = Arrangement.spacedBy(12.dp),
   ) {
-    TopBar("Connections", { save(); onBack() })
-    Text("All optional. Nightfall works without any of these.", style = style(14, color = Muted))
-    Heading("Home Assistant")
-    Text("Create an automation with a Webhook trigger, then enter its ID.", style = style(14, color = Muted))
-    Field("Server URL", haUrl, "http://homeassistant.local:8123") { haUrl = it }
-    Field("Webhook ID", haWebhook, secret = true) { haWebhook = it }
-    OutlineButton("Test Home Assistant") { test(run { save(); Connections.haTarget(context) }) }
-    Heading("n8n or any webhook")
-    Text("Events are posted as JSON to this URL.", style = style(14, color = Muted))
-    Field("Webhook URL", n8nUrl, "https://example.com/webhook/nightfall") { n8nUrl = it }
-    Field("Header name, if needed", n8nHeader) { n8nHeader = it }
-    Field("Header value", n8nValue, secret = true) { n8nValue = it }
-    OutlineButton("Test n8n") { test(run { save(); Connections.n8nTarget(context) }) }
+    Text("Settings", style = style(28, FontWeight.ExtraBold))
+    Text("Connections are optional. Nightfall works without them.", style = style(14, color = Muted))
+    SectionHeading("Home Assistant", "How to connect Home Assistant") { help = Help.HOME_ASSISTANT }
+    Field("Server URL", haUrl, "http://homeassistant.local:8123") { haUrl = it; Connections.set(context, Connections.HA_URL, it) }
+    Field("Webhook ID", haWebhook, secret = true) { haWebhook = it; Connections.set(context, Connections.HA_WEBHOOK, it) }
+    OutlineButton("Test Home Assistant") { test(Connections.haTarget(context)) }
+    SectionHeading("n8n", "How to connect n8n") { help = Help.N8N }
+    Field("Webhook URL", n8nUrl, "https://example.com/webhook/nightfall") { n8nUrl = it; Connections.set(context, Connections.N8N_URL, it) }
+    Field("Header name, if needed", n8nHeader) { n8nHeader = it; Connections.set(context, Connections.N8N_HEADER, it) }
+    Field("Header value", n8nValue, secret = true) { n8nValue = it; Connections.set(context, Connections.N8N_VALUE, it) }
+    OutlineButton("Test n8n") { test(Connections.n8nTarget(context)) }
     Heading("Automation key")
     Text("Commands sent to this app must include this key.", style = style(14, color = Muted))
     OutlineButton("Copy start command") { copy(Connections.startCommand(context)) }
     OutlineButton("Copy key") { copy(Connections.automationKey(context)) }
-    Box(Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 16.dp), contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
       TextAction("Make a new key", Muted) {
         Connections.newAutomationKey(context)
         toast("New key made. Update your automations.")
       }
     }
   }
+  when (help) {
+    Help.HOME_ASSISTANT -> HelpDialog(
+      title = "Connect Home Assistant",
+      onCopy = { copy(Connections.startCommand(context)) },
+      onClose = { help = null },
+    ) {
+      HelpHeading("Start Nightfall from Home Assistant")
+      Step(1, "Install the Home Assistant Companion app on this phone and sign in.")
+      Step(2, "In Nightfall, allow background start on the Routine tab.")
+      Step(3, "Tap Copy start command below, and paste it into a script or automation as a YAML action.")
+      Step(4, "Replace YOUR_PHONE with your phone's name. Look for notify.mobile_app_ in Home Assistant's list of actions.")
+      HelpHeading("See what Nightfall is doing (optional)")
+      Step(5, "Create an automation with a Webhook trigger, and allow POST.")
+      Step(6, "Copy the webhook ID into Webhook ID here, and enter your server URL.")
+      Step(7, "If this phone leaves your home network, turn off \"Only accessible from the local network\" on the trigger, and use a URL that works away from home.")
+      Step(8, "Tap Test Home Assistant. The automation should run, and the event name is in trigger.json.event.")
+    }
+    Help.N8N -> HelpDialog(
+      title = "Connect n8n",
+      onCopy = { copy(Connections.startCommand(context)) },
+      onClose = { help = null },
+    ) {
+      HelpHeading("See what Nightfall is doing")
+      Step(1, "Add a Webhook node to a workflow, and set the method to POST.")
+      Step(2, "Publish the workflow, then copy the Production URL into Webhook URL here.")
+      Step(3, "If your webhook checks a header, enter the header name and value here.")
+      Step(4, "Tap Test n8n. The workflow should run, and the event name is in body.event.")
+      HelpHeading("Start Nightfall from n8n")
+      Step(5, "n8n can't reach this phone directly, so it sends the command through Home Assistant.")
+      Step(6, "Install the Companion app on this phone and allow background start.")
+      Step(7, "Add a Home Assistant node that calls the notify.mobile_app_ action for your phone.")
+      Step(8, "Tap Copy start command below, and use its message and data values in that node.")
+    }
+    null -> Unit
+  }
+}
+
+@Composable
+private fun SectionHeading(text: String, helpLabel: String, onHelp: () -> Unit) {
+  Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+    Text(text, Modifier.weight(1f), style = style(18, FontWeight.ExtraBold))
+    IconAction(Icons.INFO, helpLabel, Amber, onHelp)
+  }
+}
+
+@Composable
+private fun HelpHeading(text: String) {
+  Text(text, Modifier.padding(top = 8.dp), style = style(15, FontWeight.ExtraBold))
+}
+
+@Composable
+private fun Step(number: Int, text: String) {
+  Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+    Text("$number", style = style(14, FontWeight.ExtraBold, Amber, line = 21))
+    Text(text, style = style(14, color = Muted, line = 21))
+  }
+}
+
+@Composable
+private fun HelpDialog(title: String, onCopy: () -> Unit, onClose: () -> Unit, steps: @Composable () -> Unit) {
+  AlertDialog(
+    onDismissRequest = onClose,
+    containerColor = Panel,
+    title = { Text(title, style = style(20, FontWeight.ExtraBold)) },
+    text = {
+      Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        steps()
+      }
+    },
+    confirmButton = { TextAction("Close", onClick = onClose) },
+    dismissButton = { TextAction("Copy start command", Muted, onCopy) },
+  )
 }
 
 @Composable

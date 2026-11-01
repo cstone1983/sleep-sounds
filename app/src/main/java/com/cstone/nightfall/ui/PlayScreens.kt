@@ -101,7 +101,7 @@ fun TonightScreen(
     Card(padding = androidx.compose.foundation.layout.PaddingValues(14.dp, 10.dp), onClick = onRoutine, modifier = Modifier.fillMaxWidth()) {
       Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         Box(Modifier.size(10.dp).clip(CircleShape).background(Amber))
-        Text("Routine and connections", style = style(14, FontWeight.Bold))
+        Text("Your automation starts this", style = style(14, FontWeight.Bold))
       }
     }
     Card(Modifier.fillMaxWidth(), padding = androidx.compose.foundation.layout.PaddingValues(20.dp)) {

@@ -1,6 +1,6 @@
 # Connecting Nightfall to automations
 
-Nightfall doesn't need any of this to work. Every connection is optional, and details are entered in the app under **Connections**, so it works with anyone's Home Assistant or n8n.
+Nightfall doesn't need any of this to work. Every connection is optional, and details are entered in the app in the **Settings** tab, so it works with anyone's Home Assistant or n8n.
 
 ## Before you start
 
@@ -9,7 +9,7 @@ Nightfall doesn't need any of this to work. Every connection is optional, and de
 
 ## Sending commands to the app
 
-Commands are Android broadcasts sent to the app package, `com.cstone.nightfall`. Every command must include the automation key shown under **Connections**. Anything else is ignored and logged as `REJECTED`.
+Commands are Android broadcasts sent to the app package, `com.cstone.nightfall`. Every command must include the automation key shown in the **Settings** tab. Anything else is ignored and logged as `REJECTED`.
 
 | Action | What it does | Extras |
 |---|---|---|
@@ -20,7 +20,7 @@ Commands are Android broadcasts sent to the app package, `com.cstone.nightfall`.
 
 ### From Home Assistant
 
-The Companion app delivers the broadcast. **Copy start command** in Connections gives you this with your key filled in:
+The Companion app delivers the broadcast. **Copy start command** in Settings gives you this with your key filled in:
 
 ```yaml
 action: notify.mobile_app_YOUR_PHONE
@@ -50,7 +50,7 @@ data:
 
 ## Getting events from the app
 
-Fill in either or both targets under **Connections**, and use the test button to check them.
+Fill in either or both targets in the **Settings** tab, and use the test button to check them.
 
 - **Home Assistant:** server URL plus the ID from an automation's Webhook trigger.
 - **n8n or any webhook:** a URL, plus an optional header name and value.

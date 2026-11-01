@@ -113,6 +113,8 @@ object Icons {
   const val CHECK = "m5 12 5 5 9-10"
   const val CROSS = "M6 6l12 12M18 6 6 18"
   const val TRASH = "M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"
+  const val SETTINGS = "M4 7h10M18 7h2M4 17h2M10 17h10M16 5v4M8 15v4"
+  const val INFO = "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 8h.01"
   const val PLAY = "M7 4v16l13-8L7 4Z"
   const val PAUSE = "M7 4h4v16H7zM14 4h4v16h-4z"
 }
@@ -225,6 +227,7 @@ enum class Tab(val label: String, val icon: String) {
   MIXES("Mixes", Icons.BOOKMARK),
   MEDITATE("Meditate", Icons.MEDITATE),
   ROUTINE("Routine", Icons.HOME),
+  SETTINGS("Settings", Icons.SETTINGS),
 }
 
 @Composable
