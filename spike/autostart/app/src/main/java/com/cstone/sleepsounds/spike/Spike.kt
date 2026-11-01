@@ -63,18 +63,38 @@ object SpikeLog {
 /** The entry point Home Assistant reaches through the Companion app's broadcast command. */
 class StartReceiver : BroadcastReceiver() {
   override fun onReceive(context: Context, intent: Intent) {
-    val stop = intent.action.orEmpty().endsWith(".STOP")
-    SpikeLog.add(context, "RECEIVED ${if (stop) "stop" else "start"} target=${context.applicationInfo.targetSdkVersion}")
-    val service = Intent(context, PlaybackService::class.java).putExtras(intent)
-    if (stop) {
-      context.stopService(service)
+    val command = intent.action.orEmpty().substringAfterLast('.')
+    if (intent.getStringExtra("key") != Connections.automationKey(context)) {
+      SpikeLog.add(context, "REJECTED ${command.lowercase()}: wrong or missing key")
       return
     }
+    SpikeLog.add(context, "RECEIVED ${command.lowercase()} target=${context.applicationInfo.targetSdkVersion}")
+    val service = Intent(context, PlaybackService::class.java).putExtras(intent).apply { removeExtra("key") }
+    when (command) {
+      "STOP" -> context.stopService(service)
+      "TOGGLE" -> runningOnly(context, service.setAction(ACTION_TOGGLE))
+      "ADD15" -> runningOnly(context, service.setAction(ACTION_ADD))
+      else -> start(context, service)
+    }
+  }
+
+  private fun start(context: Context, service: Intent) {
     try {
       context.startForegroundService(service)
       SpikeLog.add(context, "FGS_START_REQUESTED")
     } catch (e: ForegroundServiceStartNotAllowedException) {
       SpikeLog.add(context, "FAIL fgs_start_denied ${e.message}")
+      val pending = goAsync()
+      Reporter.send(context, "start_failed", mapOf("ok" to false, "reason" to "background_start_denied")) { pending.finish() }
+    }
+  }
+
+  // A running foreground service keeps the app startable. If nothing is playing there is nothing to control.
+  private fun runningOnly(context: Context, service: Intent) {
+    try {
+      context.startService(service)
+    } catch (e: IllegalStateException) {
+      SpikeLog.add(context, "IGNORED ${service.action}: nothing playing")
     }
   }
 }
@@ -90,6 +110,7 @@ class PlaybackService : Service() {
   @Volatile private var framesWritten = 0L
   @Volatile private var lastWrite = 0
   private var focusResult = -1
+  private var stopReason = "stopped"
   private var session: MediaSession? = null
   @Volatile private var paused = false
   private var hasTimer = false
@@ -98,6 +119,7 @@ class PlaybackService : Service() {
   private var resumedAt = 0L
   private val endTimer = Runnable {
     SpikeLog.add(this, "TIMER_ENDED")
+    stopReason = "timer_ended"
     stopSelf()
   }
   private val tick = object : Runnable {
@@ -134,6 +156,7 @@ class PlaybackService : Service() {
       SpikeLog.add(this, "FOREGROUND ok")
     } catch (e: Exception) {
       SpikeLog.add(this, "FAIL start_foreground ${e.javaClass.simpleName} ${e.message}")
+      Reporter.send(this, "start_failed", mapOf("ok" to false, "reason" to "foreground_denied"))
       stopSelf()
       return START_NOT_STICKY
     }
@@ -226,6 +249,14 @@ class PlaybackService : Service() {
       val advancing = second > first && first >= 0
       val ok = focusResult == AudioManager.AUDIOFOCUS_REQUEST_GRANTED && lastWrite > 0 && advancing
       SpikeLog.add(this, "${if (ok) "CONFIRMED" else "FAIL unconfirmed"} focus=$focusResult lastWrite=$lastWrite head=$first->$second playState=${output.playState}")
+      if (ok) {
+        Reporter.send(this, "started", state(true))
+      } else {
+        // Android mutes without an error, and frames keep advancing, so a refused focus request counts as a failed start.
+        Reporter.send(this, "start_failed", state(false) + ("reason" to "audio_not_confirmed"))
+        stopReason = "start_failed"
+        stopSelf()
+      }
     }, 1_000)
   }
 
@@ -254,6 +285,7 @@ class PlaybackService : Service() {
       if (hasTimer) handler.postDelayed(endTimer, remainingMs)
     }
     SpikeLog.add(this, "CONTROL ${if (paused) "pause" else "resume"} left=${timeLeft() / 1000}s")
+    Reporter.send(this, if (paused) "paused" else "resumed", state(true))
     publish()
   }
 
@@ -265,8 +297,16 @@ class PlaybackService : Service() {
     handler.removeCallbacks(endTimer)
     if (!paused) handler.postDelayed(endTimer, remainingMs)
     SpikeLog.add(this, "CONTROL add15 left=${remainingMs / 1000}s")
+    Reporter.send(this, "time_added", state(true))
     publish()
   }
+
+  private fun state(ok: Boolean): Map<String, Any?> = mapOf(
+    "ok" to ok,
+    "focus" to focusResult,
+    "seconds_left" to if (hasTimer) timeLeft() / 1000 else null,
+    "ends_at" to if (hasTimer && !paused) System.currentTimeMillis() + timeLeft() else null,
+  )
 
   private fun timeLeft(running: Boolean = !paused): Long =
     if (running) (remainingMs - (System.currentTimeMillis() - resumedAt)).coerceAtLeast(0) else remainingMs
@@ -372,7 +412,8 @@ class PlaybackService : Service() {
       isActive = false
       release()
     }
-    SpikeLog.add(this, "STOPPED frames=$framesWritten")
+    SpikeLog.add(this, "STOPPED frames=$framesWritten reason=$stopReason")
+    if (stopReason != "start_failed") Reporter.send(this, stopReason, mapOf("ok" to true))
     super.onDestroy()
   }
 }
@@ -407,6 +448,7 @@ class MainActivity : Activity() {
     }
     button("Stop") { stopService(Intent(this, PlaybackService::class.java)) }
     button("Allow background start") { askToRemoveBatteryLimits() }
+    button("Connections") { startActivity(Intent(this, ConnectionsActivity::class.java)) }
     button("App battery settings") {
       startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")))
     }
@@ -414,6 +456,10 @@ class MainActivity : Activity() {
     logView = TextView(this).apply { textSize = 12f }
     column.addView(ScrollView(this).apply { addView(logView) })
     setContentView(column)
+    // nightfall://start: the one-tap route, which works because this screen is visible.
+    if (intent?.data?.host == "start") {
+      startForegroundService(Intent(this, PlaybackService::class.java).putExtra("secs", 2700))
+    }
   }
 
   // Runs after the notification prompt, so the two system dialogs never stack.
