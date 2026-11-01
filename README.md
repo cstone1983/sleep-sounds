@@ -20,6 +20,8 @@ Status: early. `spike/autostart` is a small test app proving that sound can star
 
 The app must stay on target API 36 for unattended start, and it has to treat a failed audio focus request as a failed start.
 
+A full start from Home Assistant through the Companion app has also worked: the app confirmed audio in about 3 seconds and reported it to n8n. That test ran with the screen on and the phone unplugged. Screen off, charging and overnight runs are still to do.
+
 ## Build
 
 Open `spike/autostart` in Android Studio, or run `gradlew assembleDebug` there.
