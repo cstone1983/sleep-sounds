@@ -75,6 +75,8 @@ object Connections {
       data:
         message: command_broadcast_intent
         data:
+          ttl: 0
+          priority: high
           intent_package_name: $pkg
           intent_action: $pkg.START
           intent_extras: key:${automationKey(context)}

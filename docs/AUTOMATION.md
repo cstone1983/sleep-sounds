@@ -29,10 +29,14 @@ action: notify.mobile_app_YOUR_PHONE
 data:
   message: command_broadcast_intent
   data:
+    ttl: 0
+    priority: high
     intent_package_name: <package>
     intent_action: <package>.START
     intent_extras: key:<your key>
 ```
+
+`ttl: 0` and `priority: high` make the push wake a sleeping phone at once. Without them it can wait for the phone's next check-in.
 
 ### From n8n
 
