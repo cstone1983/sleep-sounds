@@ -117,6 +117,7 @@ object Icons {
   const val INFO = "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 8h.01"
   const val PLAY = "M7 4v16l13-8L7 4Z"
   const val PAUSE = "M7 4h4v16H7zM14 4h4v16h-4z"
+  const val STOP = "M6 6h12v12H6z"
 }
 
 /** Draws one of the 24-unit stroke icons from the design. */

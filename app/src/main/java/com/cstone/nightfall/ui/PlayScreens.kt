@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,6 +50,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.cstone.nightfall.audio.Category
 import com.cstone.nightfall.audio.SOUNDS
 import com.cstone.nightfall.audio.soundById
@@ -57,6 +61,7 @@ import com.cstone.nightfall.data.Mix
 import com.cstone.nightfall.data.Tonight
 import com.cstone.nightfall.playback.PlayState
 import com.cstone.nightfall.playback.Player
+import com.cstone.nightfall.playback.Preview
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -163,6 +168,18 @@ fun MixerScreen(
 ) {
   var category by remember { mutableStateOf(Category.RAIN) }
   fun update(layer: Layer) = onChange(mix.copy(layers = mix.layers.map { if (it.soundId == layer.soundId) layer else it }))
+  val context = LocalContext.current
+  val previewing by Preview.playing.collectAsState()
+  LaunchedEffect(mix.layers) { Preview.sync(mix.layers) }
+  val lifecycle = LocalLifecycleOwner.current.lifecycle
+  DisposableEffect(lifecycle) {
+    val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_STOP) Preview.stop() }
+    lifecycle.addObserver(observer)
+    onDispose {
+      lifecycle.removeObserver(observer)
+      Preview.stop()
+    }
+  }
   Box(Modifier.fillMaxSize()) {
     Column(Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
       TopBar(mix.name, onBack) { TextAction("Save", onClick = onSave) }
@@ -172,7 +189,11 @@ fun MixerScreen(
           Text("Tap a sound below to add it.", Modifier.padding(vertical = 8.dp), style = style(14, color = Muted))
         }
         Column(Modifier.verticalScroll(rememberScrollState())) {
-          for (layer in mix.layers) LayerRow(layer, ::update)
+          for (layer in mix.layers) {
+            // A running session already plays these, and the sliders change it live.
+            val onPreview = if (state.active) null else ({ Preview.toggle(context, layer) })
+            LayerRow(layer, previewing == layer.soundId, onPreview, ::update)
+          }
         }
       }
       Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -243,7 +264,10 @@ fun MixerScreen(
           .clip(RoundedCornerShape(28.dp))
           .background(Amber)
           .semantics { contentDescription = "Start" }
-          .clickable(onClick = onStart),
+          .clickable {
+            Preview.stop()
+            onStart()
+          },
         contentAlignment = Alignment.Center,
       ) {
         Glyph(Icons.PLAY, 28.dp, OnAmber, filled = true)
@@ -264,7 +288,7 @@ private fun PillIcon(path: String, label: String, onClick: () -> Unit) {
 }
 
 @Composable
-private fun LayerRow(layer: Layer, onChange: (Layer) -> Unit) {
+private fun LayerRow(layer: Layer, previewing: Boolean, onPreview: (() -> Unit)?, onChange: (Layer) -> Unit) {
   val sound = soundById(layer.soundId) ?: return
   Column {
     Row(Modifier.heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -273,6 +297,14 @@ private fun LayerRow(layer: Layer, onChange: (Layer) -> Unit) {
       TextAction("Drift", if (layer.drift) Amber else Faint) { onChange(layer.copy(drift = !layer.drift)) }
       Spacer(Modifier.size(10.dp))
       TextAction("Soften", if (layer.soften) Amber else Faint) { onChange(layer.copy(soften = !layer.soften)) }
+      if (onPreview != null) {
+        Spacer(Modifier.size(6.dp))
+        if (previewing) {
+          IconAction(Icons.STOP, "Stop ${sound.name} preview", Amber, onPreview)
+        } else {
+          IconAction(Icons.PLAY, "Preview ${sound.name}", onClick = onPreview)
+        }
+      }
     }
     Slider(
       value = layer.volume.toFloat(),

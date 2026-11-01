@@ -3,16 +3,20 @@ package com.cstone.nightfall
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import com.cstone.nightfall.data.Layer
 import com.cstone.nightfall.playback.PlayState
+import com.cstone.nightfall.playback.Preview
 import com.cstone.nightfall.ui.NightfallApp
 import com.cstone.nightfall.ui.Route
 import com.cstone.nightfall.ui.Tab
 import com.github.takahirom.roborazzi.captureRoboImage
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -76,6 +80,57 @@ class ScreensTest {
     compose.onNodeWithText("Save").performClick()
     compose.waitForIdle()
     compose.onNodeWithText("Change the mix").assertIsDisplayed()
+  }
+
+  @Test
+  fun selectedSoundsPreviewOneAtATime() {
+    compose.setContent { NightfallApp() }
+    compose.onNodeWithText("Change the mix").performClick()
+    compose.waitForIdle()
+    compose.onNodeWithContentDescription("Preview Heavy rain").performClick()
+    compose.waitForIdle()
+    assertEquals("heavy_rain", Preview.playing.value)
+    compose.onRoot().captureRoboImage("$OUT/mixer-preview.png")
+    compose.onNodeWithContentDescription("Preview Thunder").performClick()
+    compose.waitForIdle()
+    assertEquals("thunder", Preview.playing.value)
+    compose.onNodeWithContentDescription("Preview Heavy rain").assertIsDisplayed()
+    compose.onNodeWithContentDescription("Stop Thunder preview").performClick()
+    compose.waitForIdle()
+    assertNull(Preview.playing.value)
+    compose.onNodeWithContentDescription("Preview Thunder").assertIsDisplayed()
+  }
+
+  @Test
+  fun removingASoundStopsItsPreview() {
+    compose.setContent { NightfallApp() }
+    compose.onNodeWithText("Change the mix").performClick()
+    compose.waitForIdle()
+    compose.onNodeWithContentDescription("Preview Heavy rain").performClick()
+    compose.waitForIdle()
+    compose.onAllNodesWithText("Heavy rain")[1].performClick()
+    compose.waitForIdle()
+    assertNull(Preview.playing.value)
+  }
+
+  @Test
+  fun leavingTheMixerStopsThePreview() {
+    compose.setContent { NightfallApp() }
+    compose.onNodeWithText("Change the mix").performClick()
+    compose.waitForIdle()
+    compose.onNodeWithContentDescription("Preview Heavy rain").performClick()
+    compose.waitForIdle()
+    compose.onNodeWithContentDescription("Back").performClick()
+    compose.waitForIdle()
+    assertNull(Preview.playing.value)
+  }
+
+  @Test
+  fun noPreviewWhileASessionPlays() {
+    compose.setContent { NightfallApp(previewState = PLAYING) }
+    compose.onNodeWithText("Change the mix").performClick()
+    compose.waitForIdle()
+    compose.onNodeWithContentDescription("Preview Heavy rain").assertDoesNotExist()
   }
 
   @Test
