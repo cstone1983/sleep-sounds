@@ -4,7 +4,9 @@ An Android sleep sounds app that can start itself at bedtime, with optional Home
 
 Status: early but usable. The app in `app/` has the Tonight screen, a mixer with 18 sounds generated live on the phone, a sleep timer with fade, saved mixes, a media notification, night dim, breathing, and optional Home Assistant and n8n connections.
 
-Not built yet: guided meditation audio, room speakers such as Sonos, widgets, and a scheduled backup start.
+Not built yet: guided meditation audio, room speakers such as Sonos, and widgets.
+
+The app has no bedtime schedule of its own. Automatic starts come only from an outside automation, such as Home Assistant or n8n. See `docs/AUTOMATION.md`.
 
 ## Layout
 
