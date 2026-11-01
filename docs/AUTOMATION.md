@@ -81,3 +81,17 @@ Each event is a JSON POST:
 | `test` | Sent by a test button |
 
 If the phone can't start at all, it may not be able to report that. Treat a missing `started` event after about 20 seconds as a failure.
+
+## A worked example: Home Assistant and n8n together
+
+This is one way to connect them. Adjust the names for your own setup.
+
+1. Create two helpers: an on/off switch for autostart, and a text helper to hold Nightfall's state.
+2. In n8n, make a webhook that takes Nightfall's events, checks the key header, and copies `event` into the text helper with a Home Assistant node.
+3. Point **n8n or any webhook** under Connections at that URL, with the key header.
+4. Create a Home Assistant script that:
+   - sets the text helper to `starting`
+   - sends the start command above
+   - waits up to 25 seconds for the helper to change to `started` or `start_failed`
+   - sends the one-tap notification if it isn't `started`
+5. Run that script from your bedtime routine, only when the autostart switch is on.
