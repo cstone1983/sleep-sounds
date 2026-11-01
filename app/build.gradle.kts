@@ -19,6 +19,8 @@ android {
 
   buildFeatures { compose = true }
 
+  androidResources { noCompress += "ogg" }
+
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17

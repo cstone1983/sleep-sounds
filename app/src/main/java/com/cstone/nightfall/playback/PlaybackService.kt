@@ -14,6 +14,7 @@ import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.AudioTimestamp
 import android.media.MediaMetadata
+import android.media.MediaPlayer
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Bundle
@@ -30,6 +31,8 @@ import com.cstone.nightfall.connect.Reporter
 import com.cstone.nightfall.data.Layer
 import com.cstone.nightfall.data.Mix
 import com.cstone.nightfall.data.Store
+import com.cstone.nightfall.data.Guided
+import com.cstone.nightfall.data.guidedById
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -63,6 +66,10 @@ class PlaybackService : Service() {
   private var remainingMs = 0L
   private var resumedAt = 0L
   private var fadeMs = 0L
+  private var voice: MediaPlayer? = null
+  private var guide: Guided? = null
+  private var voiceLevel = 0.8f
+  private lateinit var attributes: AudioAttributes
 
   private val tick = object : Runnable {
     override fun run() {
@@ -104,10 +111,19 @@ class PlaybackService : Service() {
     val tonight = store.tonight.value
     val mix = chooseMix(store, intent?.getStringExtra(EXTRA_MIX))
     automation = intent?.getBooleanExtra(EXTRA_AUTOMATION, false) ?: false
+    val guided = guidedById(intent?.getStringExtra(EXTRA_SESSION))
     title = mix.name
-    layers = mix.layers
+    layers = if (guided != null && !tonight.mixUnderGuided) emptyList() else mix.layers
+    voiceLevel = tonight.voiceLevel / 100f
     gain = (intent?.getIntExtra(EXTRA_GAIN, tonight.gain) ?: tonight.gain).coerceIn(1, 100) / 100f
-    val seconds = intent?.getIntExtra(EXTRA_SECONDS, tonight.minutes * 60) ?: (tonight.minutes * 60)
+    val chosen = intent?.getIntExtra(EXTRA_SECONDS, tonight.minutes * 60) ?: (tonight.minutes * 60)
+    // Without a mix, the session ends with the voice. Otherwise the sounds carry on after it.
+    val seconds = when {
+      guided == null -> chosen
+      !tonight.mixUnderGuided -> guided.minutes * 60 + 90
+      chosen == 0 -> 0
+      else -> maxOf(chosen, guided.minutes * 60 + 90)
+    }
     hasTimer = seconds > 0
     totalMs = seconds * 1_000L
     remainingMs = totalMs
@@ -123,7 +139,7 @@ class PlaybackService : Service() {
       return
     }
 
-    val attributes = AudioAttributes.Builder()
+    attributes = AudioAttributes.Builder()
       .setUsage(AudioAttributes.USAGE_MEDIA)
       .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
       .build()
@@ -146,9 +162,76 @@ class PlaybackService : Service() {
 
     running = true
     Player.service = this
+    guided?.let { playVoice(it) }
     publish()
     handler.post(tick)
     handler.postDelayed({ verify() }, 2_000)
+  }
+
+  private fun playVoice(session: Guided) {
+    stopVoice()
+    try {
+      voice = MediaPlayer().apply {
+        setAudioAttributes(attributes)
+        assets.openFd(session.asset).use { setDataSource(it.fileDescriptor, it.startOffset, it.length) }
+        prepare()
+        setVolume(voiceLevel, voiceLevel)
+        setOnCompletionListener { finishVoice() }
+        start()
+      }
+      guide = session
+      lastText = ""
+    } catch (e: Exception) {
+      Log.w("Nightfall", "guided audio failed: $e")
+      stopVoice()
+    }
+  }
+
+  fun startGuided(id: String) {
+    val session = guidedById(id) ?: return
+    if (paused) togglePause()
+    if (hasTimer) {
+      val needed = session.minutes * 60_000L + 90_000L
+      val left = timeLeft()
+      if (left < needed) {
+        totalMs += needed - left
+        remainingMs = needed
+        resumedAt = System.currentTimeMillis()
+      }
+    }
+    playVoice(session)
+    publish()
+  }
+
+  private fun finishVoice() {
+    stopVoice()
+    lastText = ""
+    Reporter.send(this, "guided_finished", report(true))
+    publish()
+  }
+
+  private fun stopVoice() {
+    voice?.run {
+      setOnCompletionListener(null)
+      runCatching { stop() }
+      release()
+    }
+    voice = null
+    guide = null
+  }
+
+  fun setSoundLevel(level: Int) {
+    gain = level.coerceIn(0, 100) / 100f
+    applyFade()
+    Store.get(this).run { setTonight(tonight.value.copy(gain = level)) }
+    publish()
+  }
+
+  fun setVoiceLevel(level: Int) {
+    voiceLevel = level.coerceIn(0, 100) / 100f
+    voice?.setVolume(voiceLevel, voiceLevel)
+    Store.get(this).run { setTonight(tonight.value.copy(voiceLevel = level)) }
+    publish()
   }
 
   private fun chooseMix(store: Store, wanted: String?): Mix {
@@ -208,9 +291,11 @@ class PlaybackService : Service() {
     if (paused) {
       remainingMs = timeLeft(counting = true)
       engine?.pause()
+      voice?.pause()
     } else {
       resumedAt = System.currentTimeMillis()
       engine?.resume()
+      voice?.start()
     }
     Reporter.send(this, if (paused) "paused" else "resumed", report(true))
     publish()
@@ -268,14 +353,30 @@ class PlaybackService : Service() {
   /** Updates the UI every tick, but the notification only when its words change. */
   private fun publish() {
     val left = timeLeft()
-    Player.publish(PlayState(true, paused, title, layers, hasTimer, left, confirmed))
+    val speaking = voice
+    Player.publish(
+      PlayState(
+        active = true,
+        paused = paused,
+        title = title,
+        layers = layers,
+        hasTimer = hasTimer,
+        leftMs = left,
+        confirmed = confirmed,
+        guideTitle = guide?.title.orEmpty(),
+        voiceLeftMs = speaking?.let { (it.duration - it.currentPosition).toLong() } ?: 0,
+        voiceTotalMs = speaking?.duration?.toLong() ?: 0,
+        soundLevel = (gain * 100).toInt(),
+        voiceLevel = (voiceLevel * 100).toInt(),
+      ),
+    )
     val text = statusText(left)
     if (text == lastText) return
     lastText = text
     val active = session ?: return
     active.setMetadata(
       MediaMetadata.Builder()
-        .putString(MediaMetadata.METADATA_KEY_TITLE, title)
+        .putString(MediaMetadata.METADATA_KEY_TITLE, guide?.title ?: title)
         .putString(MediaMetadata.METADATA_KEY_ARTIST, text)
         .putLong(MediaMetadata.METADATA_KEY_DURATION, if (hasTimer) totalMs else -1)
         .build(),
@@ -322,7 +423,7 @@ class PlaybackService : Service() {
       this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE,
     )
     return Notification.Builder(this, CHANNEL)
-      .setContentTitle(title)
+      .setContentTitle(guide?.title ?: title)
       .setContentText(statusText(timeLeft()))
       .setSmallIcon(R.drawable.ic_notification)
       .setContentIntent(open)
@@ -346,6 +447,7 @@ class PlaybackService : Service() {
     Player.service = null
     Player.publish(PlayState())
     handler.removeCallbacksAndMessages(null)
+    stopVoice()
     engine?.release()
     focus?.let { audio.abandonAudioFocusRequest(it) }
     wakeLock?.takeIf { it.isHeld }?.release()
@@ -361,6 +463,7 @@ class PlaybackService : Service() {
     const val EXTRA_SECONDS = "secs"
     const val EXTRA_GAIN = "gain"
     const val EXTRA_MIX = "mix"
+    const val EXTRA_SESSION = "session"
     const val EXTRA_AUTOMATION = "automation"
   }
 }

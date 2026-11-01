@@ -52,6 +52,12 @@ class ScreensTest {
   @Test fun nowPlaying() = shot("now-playing", Route.NowPlaying, PLAYING)
   @Test fun nightDim() = shot("night-dim", Route.NightDim, PLAYING)
   @Test fun breathe() = shot("breathe", Route.Breathe)
+  @Test fun guidedPlayer() = shot(
+    "guided",
+    Route.Guided,
+    PLAYING.copy(guideTitle = "Body scan", voiceLeftMs = 7 * 60_000L, voiceTotalMs = 10 * 60_000L),
+  )
+  @Test fun guidedFinished() = shot("guided-finished", Route.Guided, PLAYING)
   @Test fun settings() = shot("settings", Route.Main(Tab.SETTINGS))
 
   @Test

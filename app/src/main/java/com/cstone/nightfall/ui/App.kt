@@ -32,6 +32,7 @@ sealed interface Route {
   data object NowPlaying : Route
   data object NightDim : Route
   data object Breathe : Route
+  data object Guided : Route
 }
 
 @Composable
@@ -87,7 +88,15 @@ fun NightfallApp(start: Route = Route.Main(Tab.TONIGHT), previewState: PlayState
                   onNew = { openMixer(Mix(store.newMixId(), "New mix", emptyList())) },
                   onDelete = { store.deleteMix(it.id) },
                 )
-                Tab.MEDITATE -> MeditateScreen(onBreathe = { go(Route.Breathe) })
+                Tab.MEDITATE -> MeditateScreen(
+                  tonight = tonight,
+                  onBreathe = { go(Route.Breathe) },
+                  onGuided = {
+                    Player.startGuided(context, it.id)
+                    go(Route.Guided)
+                  },
+                  onChange = store::setTonight,
+                )
                 Tab.ROUTINE -> RoutineScreen(mix = store.tonightMix(), tonight = tonight)
                 Tab.SETTINGS -> SettingsScreen()
               }
@@ -129,6 +138,7 @@ fun NightfallApp(start: Route = Route.Main(Tab.TONIGHT), previewState: PlayState
           )
           Route.NightDim -> NightDimScreen(state = state, onWake = ::back)
           Route.Breathe -> BreatheScreen(onBack = ::back)
+          Route.Guided -> GuidedPlayerScreen(state = state, tonight = tonight, onBack = ::back)
         }
       }
     }

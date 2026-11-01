@@ -24,6 +24,8 @@ data class Tonight(
   val fadeMinutes: Int = 10,
   val outputId: Int = 0,
   val gain: Int = 45,
+  val voiceLevel: Int = 80,
+  val mixUnderGuided: Boolean = true,
 )
 
 private val STARTER_MIXES = listOf(
@@ -52,6 +54,8 @@ class Store private constructor(context: Context) {
       .putInt("fade", value.fadeMinutes)
       .putInt("output", value.outputId)
       .putInt("gain", value.gain)
+      .putInt("voice", value.voiceLevel)
+      .putBoolean("under", value.mixUnderGuided)
       .apply()
   }
 
@@ -82,6 +86,8 @@ class Store private constructor(context: Context) {
     fadeMinutes = prefs.getInt("fade", 10),
     outputId = prefs.getInt("output", 0),
     gain = prefs.getInt("gain", 45),
+    voiceLevel = prefs.getInt("voice", 80),
+    mixUnderGuided = prefs.getBoolean("under", true),
   )
 
   private fun readMixes(): List<Mix> =

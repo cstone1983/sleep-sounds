@@ -13,7 +13,7 @@ Commands are Android broadcasts sent to the app package, `com.cstone.nightfall`.
 
 | Action | What it does | Extras |
 |---|---|---|
-| `<package>.START` | Starts tonight's mix | `key`, plus optional `secs` (0 means no timer), `gain` (1 to 100) and `mix` (a mix name) |
+| `<package>.START` | Starts tonight's mix | `key`, plus optional `secs` (0 means no timer), `gain` (1 to 100) `mix` (a mix name) and `session` (a guided session: `slow_countdown`, `letting_go`, `body_scan` or `deep_rest`) |
 | `<package>.STOP` | Stops playback | `key` |
 | `<package>.TOGGLE` | Pauses or resumes | `key` |
 | `<package>.ADD15` | Adds 15 minutes to the timer | `key` |
@@ -76,6 +76,7 @@ Each event is a JSON POST:
 | `started` | Audio is confirmed running |
 | `start_failed` | It didn't start. `reason` is `background_start_denied`, `foreground_denied` or `audio_not_confirmed` |
 | `paused`, `resumed`, `time_added` | A control was used |
+| `guided_finished` | A guided session's voice ended. Sounds may keep playing |
 | `timer_ended` | The sleep timer finished |
 | `stopped` | Playback was stopped |
 | `test` | Sent by a test button |

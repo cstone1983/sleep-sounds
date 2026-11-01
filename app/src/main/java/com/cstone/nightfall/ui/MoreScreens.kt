@@ -20,8 +20,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -29,9 +31,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,6 +50,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -52,8 +59,11 @@ import androidx.compose.ui.unit.dp
 import com.cstone.nightfall.connect.Connections
 import com.cstone.nightfall.connect.Reporter
 import com.cstone.nightfall.connect.Target
+import com.cstone.nightfall.data.GUIDED
+import com.cstone.nightfall.data.Guided
 import com.cstone.nightfall.data.Mix
 import com.cstone.nightfall.data.Tonight
+import com.cstone.nightfall.playback.PlayState
 import com.cstone.nightfall.playback.Player
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -93,7 +103,7 @@ fun MixesScreen(
 }
 
 @Composable
-fun MeditateScreen(onBreathe: () -> Unit) {
+fun MeditateScreen(tonight: Tonight, onBreathe: () -> Unit, onGuided: (Guided) -> Unit, onChange: (Tonight) -> Unit) {
   Column(
     Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 16.dp),
     verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -105,9 +115,108 @@ fun MeditateScreen(onBreathe: () -> Unit) {
       Text("In for 4, out for 6. Plays over your mix.", style = style(13, color = Muted))
     }
     Heading("Guided")
-    Card(Modifier.fillMaxWidth()) {
-      Text("Guided sessions aren't recorded yet.", style = style(14, color = Muted))
+    for (session in GUIDED) {
+      Card(Modifier.fillMaxWidth().heightIn(min = 76.dp), onClick = { onGuided(session) }) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Column(Modifier.weight(1f)) {
+            Text(session.title, style = style(16, FontWeight.Bold))
+            Text("${session.minutes} min · ${session.note}", style = style(13, color = Muted))
+          }
+          Box(Modifier.size(44.dp).background(Raised, CircleShape), contentAlignment = Alignment.Center) {
+            Glyph(Icons.PLAY, 20.dp, Amber, filled = true)
+          }
+        }
+      }
     }
+    Card(
+      Modifier.fillMaxWidth().heightIn(min = 64.dp),
+      onClick = { onChange(tonight.copy(mixUnderGuided = !tonight.mixUnderGuided)) },
+    ) {
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Text("Keep tonight's mix playing underneath", Modifier.weight(1f), style = style(15, FontWeight.SemiBold))
+        Text(if (tonight.mixUnderGuided) "On" else "Off", style = style(14, FontWeight.ExtraBold, if (tonight.mixUnderGuided) Amber else Faint))
+      }
+    }
+    Text("Stored on this phone. Sessions play with no internet and no API use.", style = style(13, color = Muted))
+  }
+}
+
+@Composable
+fun GuidedPlayerScreen(state: PlayState, tonight: Tonight, onBack: () -> Unit) {
+  var wasPlaying by remember { mutableStateOf(state.active) }
+  LaunchedEffect(state.active) {
+    if (state.active) wasPlaying = true else if (wasPlaying) onBack()
+  }
+  val speaking = state.guideTitle.isNotEmpty()
+  Column(
+    Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp),
+    verticalArrangement = Arrangement.spacedBy(18.dp),
+  ) {
+    TopBar("Guided", onBack)
+    Column(Modifier.fillMaxWidth().padding(top = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+      Text(if (speaking) state.guideTitle else "Session finished", style = style(18, FontWeight.Bold, Muted))
+      Text(
+        if (speaking) "${(state.voiceLeftMs + 59_999) / 60_000} min" else "Resting",
+        style = style(62, FontWeight.ExtraBold, line = 72),
+      )
+      Text(
+        when {
+          state.paused -> "Paused"
+          !state.active -> "Starting"
+          speaking -> "Left in this session"
+          state.layers.isEmpty() -> "Ending now"
+          else -> "Your sounds keep playing"
+        },
+        style = style(16, color = Muted),
+      )
+    }
+    if (speaking && state.voiceTotalMs > 0) {
+      Box(Modifier.fillMaxWidth().height(8.dp).background(Line, RoundedCornerShape(4.dp))) {
+        Box(
+          Modifier
+            .fillMaxWidth(((state.voiceTotalMs - state.voiceLeftMs).toFloat() / state.voiceTotalMs).coerceIn(0f, 1f))
+            .fillMaxHeight()
+            .background(Amber, RoundedCornerShape(4.dp)),
+        )
+      }
+    }
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+      Box(
+        Modifier
+          .size(112.dp)
+          .background(Amber, CircleShape)
+          .semantics { contentDescription = if (state.paused) "Play" else "Pause" }
+          .clickable(role = Role.Button) { Player.togglePause() },
+        contentAlignment = Alignment.Center,
+      ) {
+        Glyph(if (state.paused) Icons.PLAY else Icons.PAUSE, 44.dp, OnAmber, filled = true)
+      }
+    }
+    Level("Voice", if (state.active) state.voiceLevel else tonight.voiceLevel, Player::setVoiceLevel)
+    Level("Sounds", if (state.active) state.soundLevel else tonight.gain, Player::setSoundLevel)
+    Box(Modifier.fillMaxWidth().navigationBarsPadding(), contentAlignment = Alignment.Center) {
+      TextAction("Stop", Muted) { Player.stop() }
+    }
+  }
+}
+
+/** Keeps the thumb under the finger while a change travels to the service and back. */
+@Composable
+private fun Level(label: String, value: Int, onChange: (Int) -> Unit) {
+  var dragging by remember { mutableStateOf<Float?>(null) }
+  Column {
+    Text(label, style = style(15, FontWeight.Bold))
+    Slider(
+      value = dragging ?: value.toFloat(),
+      onValueChange = {
+        dragging = it
+        onChange(it.toInt())
+      },
+      onValueChangeFinished = { dragging = null },
+      valueRange = 0f..100f,
+      modifier = Modifier.height(44.dp).semantics { contentDescription = "$label level" },
+      colors = SliderDefaults.colors(thumbColor = Amber, activeTrackColor = Amber, inactiveTrackColor = Line),
+    )
   }
 }
 
