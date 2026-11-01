@@ -5,3 +5,8 @@ local.properties
 *.apk
 .kotlin/
 spike/out/
+
+.gradle/
+build/
+app/build/
+*.apk

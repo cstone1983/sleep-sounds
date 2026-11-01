@@ -9,11 +9,11 @@ Nightfall doesn't need any of this to work. Every connection is optional, and de
 
 ## Sending commands to the app
 
-Commands are Android broadcasts sent to the app package. Every command must include the automation key shown under **Connections**. Anything else is ignored and logged as `REJECTED`.
+Commands are Android broadcasts sent to the app package, `com.cstone.nightfall`. Every command must include the automation key shown under **Connections**. Anything else is ignored and logged as `REJECTED`.
 
 | Action | What it does | Extras |
 |---|---|---|
-| `<package>.START` | Starts playback | `key`, `secs` (0 means no timer), `gain` (1 to 100) |
+| `<package>.START` | Starts tonight's mix | `key`, plus optional `secs` (0 means no timer), `gain` (1 to 100) and `mix` (a mix name) |
 | `<package>.STOP` | Stops playback | `key` |
 | `<package>.TOGGLE` | Pauses or resumes | `key` |
 | `<package>.ADD15` | Adds 15 minutes to the timer | `key` |
@@ -29,7 +29,7 @@ data:
   data:
     intent_package_name: <package>
     intent_action: <package>.START
-    intent_extras: key:<your key>,secs:2700
+    intent_extras: key:<your key>
 ```
 
 ### From n8n

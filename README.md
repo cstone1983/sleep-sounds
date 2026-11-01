@@ -2,12 +2,16 @@
 
 An Android sleep sounds app that can start itself at bedtime, with optional Home Assistant and n8n connections.
 
-Status: early. `spike/autostart` is a small test app proving that sound can start from an automation on Android 17. The full app isn't built yet.
+Status: early but usable. The app in `app/` has the Tonight screen, a mixer with 18 sounds generated live on the phone, a sleep timer with fade, saved mixes, a media notification, night dim, breathing, and optional Home Assistant and n8n connections.
+
+Not built yet: guided meditation audio, room speakers such as Sonos, widgets, and a scheduled backup start.
 
 ## Layout
 
-- `design/` holds the UI proposal: PNG renders in `renders/`, canvas source in `source/`.
-- `spike/autostart/` is the auto-start test app.
+- `app/` is the Nightfall app.
+- `docs/AUTOMATION.md` covers commands, events and setup.
+- `design/` holds the UI proposal.
+- `spike/autostart/` is the test app that proved auto-start on Android 17.
 
 ## Test results so far (Galaxy Z Fold 7, Android 17)
 
@@ -24,4 +28,8 @@ A full start from Home Assistant through the Companion app has also worked: the 
 
 ## Build
 
-Open `spike/autostart` in Android Studio, or run `gradlew assembleDebug` there.
+Run `gradlew assembleDebug` in the repo root, or open it in Android Studio.
+
+Run `gradlew :app:testDebugUnitTest -Proborazzi.test.record=true` for the tests. Screen images land in `app/build/screens`.
+
+The Manrope font is under the SIL Open Font License.
