@@ -1,0 +1,58 @@
+{
+  "v": 3,
+  "createdOnFiles": {"v": 1, "at": "2026-11-01T12:00:00Z"},
+  "title": "Sleep Sounds App Design",
+  "launch": {"view": "canvas", "page": "overview"},
+  "pages": [
+    {"id": "overview", "name": "Overview"},
+    {"id": "directions", "name": "Three directions"},
+    {"id": "flow", "name": "Recommended flow"},
+    {"id": "research", "name": "Research and plan"}
+  ],
+  "boards": {
+    "Main.dc.html": {"x": 0, "y": 0, "w": 1280, "h": 1320, "title": "Start here", "page": "overview", "expand": "fill"},
+
+    "A-Tonight.dc.html": {"x": 0, "y": 0, "w": 390, "h": 844, "title": "A · Home", "page": "directions"},
+    "A-Mixer.dc.html": {"x": 470, "y": 0, "w": 390, "h": 844, "title": "A · Mixer", "page": "directions", "is_interactive": true},
+    "A-Timer.dc.html": {"x": 940, "y": 0, "w": 390, "h": 844, "title": "A · Timer", "page": "directions"},
+
+    "B-Tonight.dc.html": {"x": 0, "y": 1180, "w": 390, "h": 844, "title": "B · Tonight (recommended)", "page": "directions", "is_interactive": true},
+    "B-Mixer.dc.html": {"x": 470, "y": 1180, "w": 390, "h": 844, "title": "B · Mixer", "page": "directions", "is_interactive": true},
+    "B-Timer.dc.html": {"x": 940, "y": 1180, "w": 390, "h": 844, "title": "B · Timer", "page": "directions", "is_interactive": true},
+
+    "C-Tonight.dc.html": {"x": 0, "y": 2360, "w": 390, "h": 844, "title": "C · Scene", "page": "directions"},
+    "C-Mixer.dc.html": {"x": 470, "y": 2360, "w": 390, "h": 844, "title": "C · Spatial mixer", "page": "directions"},
+    "C-Timer.dc.html": {"x": 940, "y": 2360, "w": 390, "h": 844, "title": "C · Timer", "page": "directions"},
+
+    "F-NowPlaying.dc.html": {"x": 0, "y": 0, "w": 390, "h": 844, "title": "Now playing", "page": "flow", "is_interactive": true},
+    "F-NightDim.dc.html": {"x": 470, "y": 0, "w": 390, "h": 844, "title": "Night dim", "page": "flow", "is_interactive": true},
+    "F-Output.dc.html": {"x": 940, "y": 0, "w": 390, "h": 844, "title": "Output picker", "page": "flow", "is_interactive": true},
+    "F-Routine.dc.html": {"x": 1410, "y": 0, "w": 390, "h": 844, "title": "Night routine", "page": "flow", "is_interactive": true},
+    "F-Meditate.dc.html": {"x": 0, "y": 1180, "w": 390, "h": 844, "title": "Meditate", "page": "flow", "is_interactive": true},
+    "F-Breathe.dc.html": {"x": 470, "y": 1180, "w": 390, "h": 844, "title": "Breathing", "page": "flow", "is_interactive": true},
+    "F-Mixes.dc.html": {"x": 940, "y": 1180, "w": 390, "h": 844, "title": "Saved mixes", "page": "flow", "is_interactive": true},
+    "F-Surfaces.dc.html": {"x": 1410, "y": 1180, "w": 390, "h": 844, "title": "Widget and lockscreen", "page": "flow"},
+
+    "R-Competitors.dc.html": {"x": 0, "y": 0, "w": 1280, "h": 1500, "title": "Competitor layouts", "page": "research", "expand": "fill"},
+    "R-Features.dc.html": {"x": 1360, "y": 0, "w": 1280, "h": 1500, "title": "Paid-feature map", "page": "research", "expand": "fill"},
+    "R-Architecture.dc.html": {"x": 2720, "y": 0, "w": 1280, "h": 900, "title": "How auto-start works", "page": "research"},
+    "R-Roadmap.dc.html": {"x": 4080, "y": 0, "w": 1280, "h": 1500, "title": "Risks, roadmap, sources", "page": "research", "expand": "fill"}
+  },
+  "order": [
+    "Main.dc.html",
+    "A-Tonight.dc.html", "A-Mixer.dc.html", "A-Timer.dc.html",
+    "B-Tonight.dc.html", "B-Mixer.dc.html", "B-Timer.dc.html",
+    "C-Tonight.dc.html", "C-Mixer.dc.html", "C-Timer.dc.html",
+    "F-NowPlaying.dc.html", "F-NightDim.dc.html", "F-Output.dc.html", "F-Routine.dc.html",
+    "F-Meditate.dc.html", "F-Breathe.dc.html", "F-Mixes.dc.html", "F-Surfaces.dc.html",
+    "R-Competitors.dc.html", "R-Features.dc.html", "R-Architecture.dc.html", "R-Roadmap.dc.html"
+  ],
+  "notes": {
+    "dirA": {"x": 0, "y": -260, "text": "A · Night Grid: closest to your current app", "kind": "title1", "maxW": 1330, "page": "directions"},
+    "dirB": {"x": 0, "y": 920, "text": "B · Tonight: one card, one Start button (recommended)", "kind": "title1", "maxW": 1330, "page": "directions"},
+    "dirC": {"x": 0, "y": 2100, "text": "C · Soundscape: a place you arrange", "kind": "title1", "maxW": 1330, "page": "directions"},
+    "flow1": {"x": 0, "y": -260, "text": "After you press Start", "kind": "title1", "maxW": 1800, "page": "flow"},
+    "flow2": {"x": 0, "y": 920, "text": "Everything else in the app", "kind": "title1", "maxW": 1800, "page": "flow"}
+  },
+  "designSystems": []
+}

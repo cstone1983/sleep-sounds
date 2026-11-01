@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Soundscape scene</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap">
+<style>
+body{margin:0}
+a{color:inherit;text-decoration:none}
+.tab{flex:1 1 0;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:600;color:#A9C6C1}
+.tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.s{flex:0 0 64px;height:64px;border-radius:16px;border:1px solid #2B5057;background:#0F2529}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; box-sizing: border-box; background: #07171A; color: #E4F1EE; font-family: 'Sora', sans-serif; overflow: hidden">
+<svg width="390" height="560" viewBox="0 0 390 560" aria-hidden="true" style="position: absolute; left: 0; top: 0">
+<rect width="390" height="560" fill="#0A2024"></rect>
+<g stroke="#1F4A50" stroke-width="1.5" stroke-linecap="round">
+<path d="M40 60l-8 26M110 30l-8 26M180 80l-8 26M250 40l-8 26M320 70l-8 26M70 140l-8 26M150 170l-8 26M230 130l-8 26M300 180l-8 26M360 130l-8 26M30 230l-8 26M120 250l-8 26M210 220l-8 26M280 270l-8 26M350 240l-8 26"></path>
+</g>
+<path d="M0 340 70 270l60 50 70-90 90 100 60-50 40 40v240H0Z" fill="#0F2C31"></path>
+<path d="M0 420 110 350l80 40 100-60 100 80v150H0Z" fill="#133539"></path>
+<path d="M195 300 110 470h170L195 300Z" fill="#1C4A4E"></path>
+<path d="M195 300v170h85L195 300Z" fill="#163E42"></path>
+<path d="M195 380l-26 90h52l-26-90Z" fill="#E8C98A"></path>
+<path d="M0 470h390v90H0Z" fill="#0B2226"></path>
+</svg>
+<div style="position: absolute; left: 20px; right: 20px; top: 28px; display: flex; justify-content: space-between; align-items: center">
+<span style="font-size: 14px; font-weight: 600; color: #CFE4E0">Tonight, 9:42 PM</span>
+<a href="F-Routine.dc.html" style="font-size: 13px; font-weight: 600; color: #7FD6C2; min-height: 44px; display: flex; align-items: center">Routine ready</a>
+</div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 0 20px 0; display: flex; flex-direction: column; gap: 14px">
+<div>
+<h1 style="margin: 0; font-size: 30px; line-height: 38px; font-weight: 700">Rain on the tent</h1>
+<p style="margin: 4px 0 0; font-size: 14px; line-height: 22px; color: #CFE4E0">45 min · Phone speaker</p>
+</div>
+<a href="C-Mixer.dc.html" style="height: 76px; border-radius: 22px; background: #7FD6C2; color: #062420; display: flex; align-items: center; justify-content: center; font-size: 21px; font-weight: 700">Enter scene</a>
+<div style="display: flex; gap: 10px; margin-right: -20px; overflow: hidden">
+<div class="s" style="border-color: #7FD6C2"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div>
+</div>
+<nav aria-label="Main" style="display: flex; margin: 0 -20px; border-top: 1px solid #1F3D42; background: #07171A; padding: 4px 8px 8px">
+<a class="tab" href="C-Tonight.dc.html" aria-current="page" style="color: #7FD6C2"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 19 9 9l4 6 3-4 5 8H3Z"></path></svg>Scene</a>
+<a class="tab" href="C-Mixer.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"></path></svg>Arrange</a>
+<a class="tab" href="F-Meditate.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM12 11c-3 0-5 2-6 5l3 1M12 11c3 0 5 2 6 5l-3 1M5 20h14"></path></svg>Meditate</a>
+<a class="tab" href="F-Routine.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 12 4l8 7v9H4v-9ZM10 20v-6h4v6"></path></svg>Routine</a>
+</nav>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

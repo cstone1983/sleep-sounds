@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Widget and lockscreen</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+body{margin:0}
+.lab{margin:0;font-size:14px;font-weight:700;color:#C9BBA6}
+.c{width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:#26211C;color:#F2E9DC}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #0C0B0A; color: #F2E9DC; font-family: 'Manrope', sans-serif; display: flex; flex-direction: column; gap: 14px; padding: 28px 20px; overflow: hidden">
+
+<p class="lab">Home screen widget</p>
+<div style="background: #1C1916; border: 1px solid #332C25; border-radius: 26px; padding: 18px; display: flex; flex-direction: column; gap: 14px">
+<div>
+<p style="margin: 0; font-size: 19px; line-height: 26px; font-weight: 800">Rain on the tent</p>
+<p style="margin: 2px 0 0; font-size: 14px; color: #C9BBA6">45 min · Phone speaker</p>
+</div>
+<div style="height: 64px; border-radius: 32px; background: #E8A860; color: #2A1C0C; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 19px; font-weight: 800"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8L7 4Z" fill="currentColor"></path></svg>Start</div>
+</div>
+
+<p class="lab" style="margin-top: 8px">Lock screen and notification</p>
+<div style="background: #1C1916; border: 1px solid #332C25; border-radius: 22px; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px">
+<div>
+<p style="margin: 0; font-size: 16px; font-weight: 800">Rain on the tent</p>
+<p style="margin: 2px 0 0; font-size: 14px; color: #C9BBA6">38 min left, silent by about 10:27 PM</p>
+</div>
+<div style="display: flex; align-items: center; gap: 12px">
+<div class="c" style="background: #E8A860; color: #2A1C0C"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h4v16H7zM14 4h4v16h-4z" fill="currentColor"></path></svg></div>
+<div class="c" style="width: auto; padding: 0 16px; font-size: 14px; font-weight: 700">+15 min</div>
+<div class="c" style="width: auto; padding: 0 16px; font-size: 14px; font-weight: 700">Stop</div>
+</div>
+</div>
+
+<p class="lab" style="margin-top: 8px">Fallback notification from Home Assistant</p>
+<div style="background: #1C1916; border: 1px solid #E8A860; border-radius: 22px; padding: 14px 16px; display: flex; align-items: center; gap: 12px">
+<div style="flex: 1 1 auto">
+<p style="margin: 0; font-size: 16px; font-weight: 800">Sounds didn't start</p>
+<p style="margin: 2px 0 0; font-size: 14px; line-height: 20px; color: #C9BBA6">Tap to play Rain on the tent.</p>
+</div>
+<div class="c" style="width: 56px; height: 56px; border-radius: 28px; background: #E8A860; color: #2A1C0C"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8L7 4Z" fill="currentColor"></path></svg></div>
+</div>
+
+<p class="lab" style="margin-top: 8px">Quick Settings tile</p>
+<div style="width: 172px; height: 72px; box-sizing: border-box; background: #1C1916; border: 1px solid #332C25; border-radius: 22px; display: flex; align-items: center; gap: 10px; padding: 0 16px">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E8A860" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14A8 8 0 1 1 10 4a7 7 0 0 0 10 10Z"></path></svg>
+<span style="font-size: 15px; font-weight: 700">Sleep sounds</span>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

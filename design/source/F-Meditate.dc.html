@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Meditate</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+body{margin:0}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+.tab{flex:1 1 0;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:600;color:#C9BBA6}
+.tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+h2{margin:0;font-size:14px;font-weight:700;color:#C9BBA6}
+.big{flex:1 1 0;min-height:92px;box-sizing:border-box;padding:12px 14px;background:#1C1916;border:1px solid #332C25;border-radius:18px;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.big b{font-size:16px;font-weight:700}
+.big span{font-size:13px;color:#C9BBA6}
+.g{display:flex;align-items:center;gap:12px;min-height:68px;box-sizing:border-box;padding:8px 14px;background:#1C1916;border:1px solid #332C25;border-radius:16px}
+.g div{flex:1 1 auto}
+.g b{display:block;font-size:16px;font-weight:700}
+.g span{font-size:13px;color:#C9BBA6}
+.g i{width:44px;height:44px;border-radius:22px;background:#26211C;color:#E8A860;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #12100E; color: #F2E9DC; font-family: 'Manrope', sans-serif; display: flex; flex-direction: column; overflow: hidden">
+<div style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 14px; padding: 24px 20px 8px; overflow: hidden">
+<h1 style="margin: 0; font-size: 28px; line-height: 36px; font-weight: 800">Meditate</h1>
+
+<section style="display: flex; flex-direction: column; gap: 8px">
+<h2>On your own</h2>
+<div style="display: flex; gap: 10px">
+<a class="big" href="F-Breathe.dc.html"><b>Slow breathing</b><span>5 min, no voice</span></a>
+<a class="big" href="B-Timer.dc.html"><b>Quiet timer</b><span>Bells, any length</span></a>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 8px">
+<h2>Guided</h2>
+<a class="g" href="F-NowPlaying.dc.html"><div><b>Body scan</b><span>12 min</span></div><i><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8L7 4Z" fill="currentColor"></path></svg></i></a>
+<a class="g" href="F-NowPlaying.dc.html"><div><b>Letting go of the day</b><span>10 min</span></div><i><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8L7 4Z" fill="currentColor"></path></svg></i></a>
+<a class="g" href="F-NowPlaying.dc.html"><div><b>Slow countdown</b><span>8 min</span></div><i><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8L7 4Z" fill="currentColor"></path></svg></i></a>
+</section>
+
+<button type="button" role="switch" aria-checked="{{under}}" onClick="{{flip}}" style="min-height: 64px; box-sizing: border-box; padding: 8px 14px; background: transparent; border: 1px solid #332C25; border-radius: 16px; color: #F2E9DC; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left">
+<span style="font-size: 15px; font-weight: 600">{{underLabel}}</span>
+<span style="font-size: 14px; font-weight: 800; color: {{stateColor}}">{{stateLabel}}</span>
+</button>
+
+<p style="margin: 0; font-size: 13px; line-height: 19px; color: #C9BBA6">Stored on this phone. Sessions play with no internet and no API use.</p>
+</div>
+
+<nav aria-label="Main" style="display: flex; border-top: 1px solid #332C25; background: #12100E; padding: 4px 8px 8px">
+<a class="tab" href="B-Tonight.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14A8 8 0 1 1 10 4a7 7 0 0 0 10 10Z"></path></svg>Tonight</a>
+<a class="tab" href="F-Mixes.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4V3Z"></path></svg>Mixes</a>
+<a class="tab" href="F-Meditate.dc.html" aria-current="page" style="color: #E8A860"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM12 11c-3 0-5 2-6 5l3 1M12 11c3 0 5 2 6 5l-3 1M5 20h14"></path></svg>Meditate</a>
+<a class="tab" href="F-Routine.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 12 4l8 7v9H4v-9ZM10 20v-6h4v6"></path></svg>Routine</a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { under: true };
+  }
+  renderVals() {
+    var self = this;
+    var under = this.state.under;
+    return {
+      under: under,
+      underLabel: 'Keep tonight\'s mix playing underneath',
+      stateLabel: under ? 'On' : 'Off',
+      stateColor: under ? '#E8A860' : '#A89A86',
+      flip: function () { self.setState({ under: !self.state.under }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

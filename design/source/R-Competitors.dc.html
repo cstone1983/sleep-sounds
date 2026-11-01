@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Competitor layouts</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+body{margin:0;background:#12100E}
+a{color:#E8A860}a:hover{color:#F4C48A}
+table{border-collapse:collapse;width:100%;min-width:980px;font-size:14px;line-height:21px}
+th{text-align:left;font-size:13px;font-weight:700;color:#C9BBA6;padding:10px 12px;border-bottom:1px solid #453B31}
+td{vertical-align:top;padding:12px;border-bottom:1px solid #332C25;color:#D9CDBB}
+td:first-child{font-weight:800;color:#F2E9DC;white-space:nowrap}
+td:last-child{color:#F2E9DC;font-weight:600}
+h2{font-size:24px;line-height:32px;font-weight:800;color:#F2E9DC;margin:0 0 12px}
+.card{background:#1C1916;border:1px solid #332C25;border-radius:16px;padding:20px;box-sizing:border-box}
+.card h3{margin:0 0 8px;font-size:17px;font-weight:700;color:#F2E9DC}
+.card p,.card li{font-size:15px;line-height:23px;color:#C9BBA6;margin:0}
+.card ul{margin:0;padding-left:18px}
+</style>
+</helmet>
+<main style="font-family: 'Manrope', sans-serif; background: #12100E; color: #F2E9DC; box-sizing: border-box; padding: 56px 32px 72px">
+<div style="max-width: 1216px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px">
+<header style="max-width: 820px">
+<h1 style="margin: 0 0 12px; font-size: 40px; line-height: 48px; font-weight: 800">How other apps lay this out</h1>
+<p style="margin: 0; font-size: 17px; line-height: 27px; color: #C9BBA6">No single app gets the mixer, the bedtime flow and automation right. Each row shows what's worth taking.</p>
+</header>
+
+<section>
+<div style="overflow-x: auto; border: 1px solid #332C25; border-radius: 16px; background: #1C1916">
+<table>
+<thead><tr><th scope="col">App</th><th scope="col">First screen</th><th scope="col">Mixing and timer</th><th scope="col">Common complaint</th><th scope="col">Worth taking</th></tr></thead>
+<tbody>
+<tr><td>BetterSleep</td><td>Search, goal card, recents, your mixes</td><td>Tap to layer up to 15 sounds. Player expands for levels. Timer sits in Current Mix.</td><td>Mixes went behind the paywall. Android sounds stopping.</td><td>Tap to layer, with an expanding tray</td></tr>
+<tr><td>Rain Rain</td><td>Sound list and mixer</td><td>Per-sound volume, Oscillator and Soften. Fade timer can auto-start.</td><td>Rain quality, from one reviewer</td><td>Drift and Soften on each sound</td></tr>
+<tr><td>myNoise</td><td>Ten colored sliders per generator</td><td>Calibrates to your ears. Two-finger slide moves all sliders on iOS.</td><td>Slow UI, stutter on lock</td><td>Moving every level together</td></tr>
+<tr><td>Noisli</td><td>Slider per sound</td><td>Saved combos, fade timer. Advanced timer is paid.</td><td>Confusing saves, deleted combos</td><td>Keep saves obvious and safe</td></tr>
+<tr><td>Calm</td><td>Scene behind the content</td><td>Scene change swaps picture and sound. Music and scene timers are separate.</td><td>Mandatory sign-up, split timers</td><td>Scenes as a mood, without the split</td></tr>
+<tr><td>Headspace</td><td>Today tab, changes around 6 to 7 PM</td><td>Sleep content sits under Explore.</td><td>Not researched in depth</td><td>A home that changes by time of day</td></tr>
+<tr><td>Tide</td><td>One large card with a time and Start</td><td>Sounds in a bottom sheet. Persistent mini-player.</td><td>Captures likely iOS only</td><td>One card, one action</td></tr>
+<tr><td>Pzizz</td><td>Main-screen Sleep button</td><td>Separate voice and music volumes.</td><td>Dated sources</td><td>Separate voice and sound levels</td></tr>
+<tr><td>Sleep as Android</td><td>Tracker first</td><td>MQTT, webhooks, Tasker and an Intent API.</td><td>Home Assistant link only receives, no retries</td><td>Open automation, but two-way</td></tr>
+<tr><td>Portal</td><td>Full-screen locations</td><td>Hue lights follow the scene.</td><td>Android availability unconfirmed</td><td>Lights moving with the sound</td></tr>
+<tr><td>Insight Timer</td><td>Large content library</td><td>Meditation timer is free.</td><td>A May 2026 redesign buried saved items</td><td>Never move someone's saved items</td></tr>
+<tr><td>Endel</td><td>Modes</td><td>Generated sound from context such as weather.</td><td>Billing complaints, price against value</td><td>Non-looping generated sound</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px">
+<div class="card"><h3>Everyone has</h3><ul><li>Per-sound volume and saved mixes</li><li>A fade-out timer</li><li>Background playback</li><li>A dark interface</li></ul></div>
+<div class="card"><h3>People complain most about</h3><ul><li>Billing and paywalled mixes</li><li>Audio stopping on Android</li><li>Redesigns that hide saved items</li><li>Timers split across screens</li></ul></div>
+<div class="card"><h3>Gaps to claim</h3><ul><li>Sound with two-way smart home control</li><li>A real, documented night mode</li><li>Reliability you can see and test</li></ul></div>
+</section>
+
+<section class="card">
+<h3>How far to trust this</h3>
+<p>No apps were installed. Google Play pages wouldn't load, and Reddit was mostly unreachable, so layouts come from iOS listings, help pages and undated third-party captures. Android versions may differ. The "no two-way Home Assistant app" finding is from a broad search, not an exhaustive one. Calm and Endel details partly come from a competitor's marketing pages. Links are in Risks, roadmap, sources.</p>
+</section>
+</div>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

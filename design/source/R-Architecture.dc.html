@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>How auto-start works</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="position: relative; width: 1280px; height: 900px; background: #12100E; color: #F2E9DC; font-family: 'Manrope', sans-serif; overflow: hidden">
+
+<div style="position: absolute; left: 284px; top: 124px; width: 712px; height: 136px; box-sizing: border-box; background: #171411; border: 1px dashed #453B31; border-radius: 16px"></div>
+
+<svg width="67" height="8" viewBox="0 0 67 8" preserveAspectRatio="none" style="position: absolute; left: 240px; top: 356px; width: 67px; height: 8px; overflow: visible; fill: none; stroke: #C9BBA6; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-1" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#C9BBA6" stroke="none" style="stroke: none; fill: #C9BBA6; fill: context-stroke"/></marker></defs><path d="M 0 4 L 63 4" marker-end="url(#dc-arrow-head-filled-1)"></path></svg>
+<svg width="67" height="8" viewBox="0 0 67 8" preserveAspectRatio="none" style="position: absolute; left: 484px; top: 356px; width: 67px; height: 8px; overflow: visible; fill: none; stroke: #C9BBA6; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-2" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#C9BBA6" stroke="none" style="stroke: none; fill: #C9BBA6; fill: context-stroke"/></marker></defs><path d="M 0 4 L 63 4" marker-end="url(#dc-arrow-head-filled-2)"></path></svg>
+<svg width="67" height="8" viewBox="0 0 67 8" preserveAspectRatio="none" style="position: absolute; left: 728px; top: 356px; width: 67px; height: 8px; overflow: visible; fill: none; stroke: #C9BBA6; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-3" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#C9BBA6" stroke="none" style="stroke: none; fill: #C9BBA6; fill: context-stroke"/></marker></defs><path d="M 0 4 L 63 4" marker-end="url(#dc-arrow-head-filled-3)"></path></svg>
+<svg width="67" height="8" viewBox="0 0 67 8" preserveAspectRatio="none" style="position: absolute; left: 972px; top: 356px; width: 67px; height: 8px; overflow: visible; fill: none; stroke: #C9BBA6; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-4" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#C9BBA6" stroke="none" style="stroke: none; fill: #C9BBA6; fill: context-stroke"/></marker></defs><path d="M 0 4 L 63 4" marker-end="url(#dc-arrow-head-filled-4)"></path></svg>
+
+<svg width="132" height="8" viewBox="0 0 132 8" preserveAspectRatio="none" style="position: absolute; left: 996px; top: 188px; width: 132px; height: 8px; overflow: visible; fill: none; stroke: #C9BBA6; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M 0 4 L 132 4"></path></svg>
+<svg width="8" height="107" viewBox="0 0 8 107" preserveAspectRatio="none" style="position: absolute; left: 1124px; top: 192px; width: 8px; height: 107px; overflow: visible; fill: none; stroke: #C9BBA6; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-5" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#C9BBA6" stroke="none" style="stroke: none; fill: #C9BBA6; fill: context-stroke"/></marker></defs><path d="M 4 0 L 4 103" marker-end="url(#dc-arrow-head-filled-5)"></path></svg>
+
+<svg width="8" height="79" viewBox="0 0 8 79" preserveAspectRatio="none" style="position: absolute; left: 1124px; top: 420px; width: 8px; height: 79px; overflow: visible; fill: none; stroke: #C9BBA6; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-6" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#C9BBA6" stroke="none" style="stroke: none; fill: #C9BBA6; fill: context-stroke"/></marker></defs><path d="M 4 0 L 4 75" marker-end="url(#dc-arrow-head-filled-6)"></path></svg>
+<svg width="67" height="8" viewBox="0 0 67 8" preserveAspectRatio="none" style="position: absolute; left: 973px; top: 556px; width: 67px; height: 8px; overflow: visible; fill: none; stroke: #C9BBA6; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-7" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#C9BBA6" stroke="none" style="stroke: none; fill: #C9BBA6; fill: context-stroke"/></marker></defs><path d="M 67 4 L 4 4" marker-end="url(#dc-arrow-head-filled-7)"></path></svg>
+<svg width="8" height="79" viewBox="0 0 8 79" preserveAspectRatio="none" style="position: absolute; left: 1124px; top: 620px; width: 8px; height: 79px; overflow: visible; fill: none; stroke: #C9BBA6; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-8" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#C9BBA6" stroke="none" style="stroke: none; fill: #C9BBA6; fill: context-stroke"/></marker></defs><path d="M 4 0 L 4 75" marker-end="url(#dc-arrow-head-filled-8)"></path></svg>
+<svg width="67" height="8" viewBox="0 0 67 8" preserveAspectRatio="none" style="position: absolute; left: 973px; top: 756px; width: 67px; height: 8px; overflow: visible; fill: none; stroke: #C9BBA6; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-9" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#C9BBA6" stroke="none" style="stroke: none; fill: #C9BBA6; fill: context-stroke"/></marker></defs><path d="M 67 4 L 4 4" marker-end="url(#dc-arrow-head-filled-9)"></path></svg>
+
+<div style="position: absolute; left: 64px; top: 40px; font-size: 32px; line-height: 40px; font-weight: 800">From your night script to sound</div>
+<div style="position: absolute; left: 64px; top: 84px; font-size: 16px; line-height: 24px; color: #C9BBA6">Home Assistant gains one start step in the script, plus a short wait for the fallback. "Playing" is reported only once sound is really running.</div>
+<div style="position: absolute; left: 300px; top: 132px; font-size: 13px; line-height: 18px; font-weight: 700; color: #C9BBA6">Other ways to start, all using the same path</div>
+
+<div style="position: absolute; left: 308px; top: 164px; width: 208px; height: 76px; box-sizing: border-box; padding: 8px; display: flex; align-items: center; justify-content: center; text-align: center; background: #1C1916; border: 1px solid #332C25; border-radius: 12px; font-size: 14px; line-height: 20px">Start button, widget or Quick Settings tile</div>
+<div style="position: absolute; left: 532px; top: 164px; width: 208px; height: 76px; box-sizing: border-box; padding: 8px; display: flex; align-items: center; justify-content: center; text-align: center; background: #1C1916; border: 1px solid #332C25; border-radius: 12px; font-size: 14px; line-height: 20px">Backup time on the phone, works with no network</div>
+<div style="position: absolute; left: 756px; top: 164px; width: 208px; height: 76px; box-sizing: border-box; padding: 8px; display: flex; align-items: center; justify-content: center; text-align: center; background: #1C1916; border: 1px solid #332C25; border-radius: 12px; font-size: 14px; line-height: 20px">n8n, by calling Home Assistant</div>
+
+<div style="position: absolute; left: 64px; top: 300px; width: 176px; height: 120px; box-sizing: border-box; padding: 12px; display: flex; align-items: center; justify-content: center; text-align: center; background: #1C1916; border: 1px solid #453B31; border-radius: 12px; font-size: 15px; line-height: 22px"><span><b>Fold 7 on charger</b><br>after 8 PM</span></div>
+<div style="position: absolute; left: 308px; top: 300px; width: 176px; height: 120px; box-sizing: border-box; padding: 12px; display: flex; align-items: center; justify-content: center; text-align: center; background: #1C1916; border: 1px solid #453B31; border-radius: 12px; font-size: 15px; line-height: 22px"><span><b>Night automation</b><br>sets the house to Night</span></div>
+<div style="position: absolute; left: 552px; top: 300px; width: 176px; height: 120px; box-sizing: border-box; padding: 12px; display: flex; align-items: center; justify-content: center; text-align: center; background: #3A2A18; border: 1px solid #E8A860; border-radius: 12px; font-size: 15px; line-height: 22px"><span><b>Nightly shutdown</b><br>New step: start sounds</span></div>
+<div style="position: absolute; left: 796px; top: 300px; width: 176px; height: 120px; box-sizing: border-box; padding: 12px; display: flex; align-items: center; justify-content: center; text-align: center; background: #1C1916; border: 1px solid #453B31; border-radius: 12px; font-size: 15px; line-height: 22px"><span><b>Companion app</b><br>sends a broadcast to the sounds app</span></div>
+<div style="position: absolute; left: 1040px; top: 300px; width: 176px; height: 120px; box-sizing: border-box; padding: 12px; display: flex; align-items: center; justify-content: center; text-align: center; background: #1C1916; border: 1px solid #453B31; border-radius: 12px; font-size: 15px; line-height: 22px"><span><b>Sounds app</b><br>media service starts, sound plays</span></div>
+
+<div style="position: absolute; left: 1040px; top: 500px; width: 176px; height: 120px; box-sizing: border-box; padding: 24px; display: flex; align-items: center; justify-content: center; text-align: center; background: #E8A860; color: #2A1C0C; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); font-size: 14px; line-height: 19px; font-weight: 800">Sound confirmed?</div>
+<div style="position: absolute; left: 796px; top: 500px; width: 176px; height: 120px; box-sizing: border-box; padding: 12px; display: flex; align-items: center; justify-content: center; text-align: center; background: #1C1916; border: 1px solid #453B31; border-radius: 12px; font-size: 15px; line-height: 22px"><span><b>After about 20 s</b><br>Home Assistant sends a one-tap notification</span></div>
+<div style="position: absolute; left: 1040px; top: 700px; width: 176px; height: 120px; box-sizing: border-box; padding: 12px; display: flex; align-items: center; justify-content: center; text-align: center; background: #1C1916; border: 1px solid #453B31; border-radius: 12px; font-size: 15px; line-height: 22px"><span><b>App reports state</b><br>over MQTT and an n8n webhook</span></div>
+<div style="position: absolute; left: 796px; top: 700px; width: 176px; height: 120px; box-sizing: border-box; padding: 12px; display: flex; align-items: center; justify-content: center; text-align: center; background: #1C1916; border: 1px solid #453B31; border-radius: 12px; font-size: 15px; line-height: 22px"><span><b>Automations react</b><br>dim lights, log the night</span></div>
+
+<div style="position: absolute; left: 990px; top: 530px; width: 32px; text-align: center; font-size: 13px; line-height: 16px; color: #C9BBA6">no</div>
+<div style="position: absolute; left: 1140px; top: 652px; width: 32px; text-align: center; font-size: 13px; line-height: 16px; color: #C9BBA6">yes</div>
+
+<div style="position: absolute; left: 64px; top: 500px; width: 660px; height: 320px; box-sizing: border-box; padding: 24px; background: #1C1916; border: 1px solid #332C25; border-radius: 12px; font-size: 15px; line-height: 23px; color: #D9CDBB"><span><b style="color: #F2E9DC">Why this suits your setup.</b> A charging phone isn't in Doze, so the trigger arrives when Android is most willing to act. Sideloading lets us stay on target API 36 and turn battery limits off.<br><br><b style="color: #F2E9DC">When Sonos is the output.</b> Home Assistant plays a prepared file on media_player.bedroom, so the phone doesn't need to wake at all. It's the most reliable path, but layers can't change live.<br><br><b style="color: #F2E9DC">What's untested.</b> None of this has run on your Fold 7. A public version faces stricter limits, covered in Risks, roadmap, sources.</span></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

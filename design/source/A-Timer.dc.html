@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Night Grid timer</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap">
+<style>
+body{margin:0}
+a{color:inherit;text-decoration:none}
+.o{height:64px;border-radius:18px;background:#151C3D;border:1px solid #2A3463;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;box-sizing:border-box}
+.o.on{background:#A9B8FF;border-color:#A9B8FF;color:#0B1026}
+.f{height:56px;border-radius:18px;border:1px solid #2A3463;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;box-sizing:border-box}
+.f.on{border-color:#A9B8FF;color:#A9B8FF}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; box-sizing: border-box; background: #0B1026; color: #E6EAFA; font-family: 'Nunito Sans', sans-serif; overflow: hidden">
+<div style="position: absolute; inset: 0; padding: 26px 20px; opacity: 0.32">
+<h1 style="margin: 0 0 16px; font-size: 28px; font-weight: 800">Sounds</h1>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 12px">
+<div style="height: 84px; border-radius: 22px; background: #A9B8FF"></div>
+<div style="height: 84px; border-radius: 22px; background: #151C3D"></div>
+<div style="height: 84px; border-radius: 22px; background: #A9B8FF"></div>
+<div style="height: 84px; border-radius: 22px; background: #151C3D"></div>
+<div style="height: 84px; border-radius: 22px; background: #151C3D"></div>
+<div style="height: 84px; border-radius: 22px; background: #151C3D"></div>
+</div>
+</div>
+<section aria-label="Sleep timer" style="position: absolute; left: 0; right: 0; bottom: 0; background: #1D2750; border-radius: 28px 28px 0 0; padding: 12px 20px 24px; display: flex; flex-direction: column; gap: 16px">
+<div style="width: 44px; height: 4px; border-radius: 2px; background: #5664A8; align-self: center"></div>
+<div>
+<h2 style="margin: 0; font-size: 22px; line-height: 30px; font-weight: 800">Sleep timer</h2>
+<p style="margin: 0; font-size: 15px; color: #C4CCEE">Silent by about 10:27 PM</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<div class="o">15 min</div><div class="o">30 min</div><div class="o on">45 min</div>
+<div class="o">1 hr</div><div class="o">1.5 hr</div><div class="o">All night</div>
+</div>
+<p style="margin: 0; font-size: 14px; font-weight: 700; color: #C4CCEE">Fade out over</p>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+<div class="f">2 min</div><div class="f">5 min</div><div class="f on">10 min</div><div class="f">20 min</div>
+</div>
+<a href="A-Tonight.dc.html" style="height: 64px; border-radius: 32px; background: #A9B8FF; color: #0B1026; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800">Set timer</a>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Saved mixes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+body{margin:0}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+.tab{flex:1 1 0;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:600;color:#C9BBA6}
+.tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #12100E; color: #F2E9DC; font-family: 'Manrope', sans-serif; display: flex; flex-direction: column; overflow: hidden">
+<div style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 12px; padding: 24px 20px 8px; overflow: hidden">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<h1 style="margin: 0; font-size: 28px; line-height: 36px; font-weight: 800">Mixes</h1>
+<a href="B-Mixer.dc.html" style="min-height: 44px; display: flex; align-items: center; font-size: 15px; font-weight: 700; color: #E8A860">New mix</a>
+</div>
+<p style="margin: 0 0 4px; font-size: 14px; line-height: 21px; color: #C9BBA6">Tap a mix to make it tonight's. Your routine plays whichever one is set.</p>
+<sc-for list="{{mixes}}" as="m" hint-placeholder-count="5">
+<button type="button" onClick="{{m.pick}}" aria-pressed="{{m.on}}" style="min-height: 84px; box-sizing: border-box; padding: 12px 16px; border-radius: 18px; border: 1px solid {{m.bd}}; background: {{m.bg}}; color: #F2E9DC; display: flex; align-items: center; gap: 12px; text-align: left">
+<span style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 2px">
+<b style="font-size: 17px; font-weight: 700">{{m.name}}</b>
+<span style="font-size: 13px; line-height: 19px; color: #C9BBA6">{{m.sounds}}</span>
+</span>
+<sc-if value="{{m.on}}" hint-placeholder-val="{{ false }}"><span style="font-size: 13px; font-weight: 800; color: #E8A860">Tonight</span></sc-if>
+</button>
+</sc-for>
+</div>
+<nav aria-label="Main" style="display: flex; border-top: 1px solid #332C25; background: #12100E; padding: 4px 8px 8px">
+<a class="tab" href="B-Tonight.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14A8 8 0 1 1 10 4a7 7 0 0 0 10 10Z"></path></svg>Tonight</a>
+<a class="tab" href="F-Mixes.dc.html" aria-current="page" style="color: #E8A860"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4V3Z"></path></svg>Mixes</a>
+<a class="tab" href="F-Meditate.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM12 11c-3 0-5 2-6 5l3 1M12 11c3 0 5 2 6 5l-3 1M5 20h14"></path></svg>Meditate</a>
+<a class="tab" href="F-Routine.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 12 4l8 7v9H4v-9ZM10 20v-6h4v6"></path></svg>Routine</a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+var MIXES = [
+  { id: 'tent', name: 'Rain on the tent', sounds: 'Heavy rain, thunder, brown noise' },
+  { id: 'cabin', name: 'Cabin fire', sounds: 'Fire, wind' },
+  { id: 'hum', name: 'Deep hum', sounds: 'Brown noise, low hum' },
+  { id: 'coast', name: 'Night coast', sounds: 'Ocean, wind, crickets' },
+  { id: 'fan', name: 'Just the fan', sounds: 'Fan' }
+];
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { sel: 'tent' };
+  }
+  renderVals() {
+    var self = this;
+    return {
+      mixes: MIXES.map(function (m) {
+        var on = self.state.sel === m.id;
+        return Object.assign({}, m, {
+          on: on,
+          bg: on ? '#26211C' : '#1C1916',
+          bd: on ? '#E8A860' : '#332C25',
+          pick: function () { self.setState({ sel: m.id }); }
+        });
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

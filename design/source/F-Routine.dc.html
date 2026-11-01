@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Night routine</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+body{margin:0}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+.tab{flex:1 1 0;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:600;color:#C9BBA6}
+.tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.rw{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px;font-size:15px}
+.rw span{color:#C9BBA6}
+.rw b{font-weight:700;text-align:right}
+.ck{display:flex;align-items:center;gap:10px;min-height:32px;font-size:14px;font-weight:600}
+.ck svg{flex:0 0 auto;color:#E8A860;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+h2{margin:0;font-size:14px;font-weight:700;color:#C9BBA6}
+.box{background:#1C1916;border:1px solid #332C25;border-radius:18px;padding:8px 16px}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #12100E; color: #F2E9DC; font-family: 'Manrope', sans-serif; display: flex; flex-direction: column; overflow: hidden">
+<div style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 12px; padding: 24px 20px 8px; overflow: hidden">
+<h1 style="margin: 0; font-size: 28px; line-height: 36px; font-weight: 800">Night routine</h1>
+
+<div class="box" style="display: flex; align-items: center; gap: 12px; min-height: 72px; box-sizing: border-box">
+<div style="flex: 1 1 auto">
+<p style="margin: 0; font-size: 16px; font-weight: 700">{{modeTitle}}</p>
+<p style="margin: 2px 0 0; font-size: 13px; line-height: 18px; color: #C9BBA6">{{modeNote}}</p>
+</div>
+<button type="button" role="switch" aria-checked="{{auto}}" aria-label="Start by itself" onClick="{{flip}}" style="flex: 0 0 64px; height: 44px; border: 0; padding: 4px; border-radius: 22px; background: {{track}}; display: flex; justify-content: {{knob}}">
+<span style="width: 36px; height: 36px; border-radius: 18px; background: #12100E; display: block"></span>
+</button>
+</div>
+
+<div class="box">
+<div class="rw"><span>Starts with</span><b>Nightly shutdown</b></div>
+<div class="rw"><span>Plays</span><b>Rain on the tent</b></div>
+<div class="rw"><span>On</span><b>Phone speaker</b></div>
+<div class="rw"><span>For</span><b>45 min, 10 min fade</b></div>
+<div class="rw"><span>Backup time</span><b>10:30 PM</b></div>
+</div>
+
+<section style="display: flex; flex-direction: column; gap: 6px">
+<h2>Ready check</h2>
+<div class="box" style="padding: 10px 16px">
+<div class="ck"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>Home Assistant connected</div>
+<div class="ck"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>Battery limits turned off for this app</div>
+<div class="ck"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>Notifications allowed</div>
+<div class="ck"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>Last night started on time</div>
+</div>
+</section>
+
+<button type="button" onClick="{{test}}" style="height: 64px; flex: 0 0 64px; border-radius: 32px; border: 1px solid #E8A860; background: transparent; color: #E8A860; font-size: 16px; font-weight: 800">{{testLabel}}</button>
+</div>
+
+<nav aria-label="Main" style="display: flex; border-top: 1px solid #332C25; background: #12100E; padding: 4px 8px 8px">
+<a class="tab" href="B-Tonight.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14A8 8 0 1 1 10 4a7 7 0 0 0 10 10Z"></path></svg>Tonight</a>
+<a class="tab" href="F-Mixes.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4V3Z"></path></svg>Mixes</a>
+<a class="tab" href="F-Meditate.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM12 11c-3 0-5 2-6 5l3 1M12 11c3 0 5 2 6 5l-3 1M5 20h14"></path></svg>Meditate</a>
+<a class="tab" href="F-Routine.dc.html" aria-current="page" style="color: #E8A860"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 12 4l8 7v9H4v-9ZM10 20v-6h4v6"></path></svg>Routine</a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { auto: true, tested: false };
+  }
+  renderVals() {
+    var self = this;
+    var auto = this.state.auto;
+    return {
+      auto: auto,
+      modeTitle: auto ? 'Start by itself' : 'Ask me first',
+      modeNote: auto ? 'Sound begins when your house goes to Night.' : 'You get a one-tap notification instead.',
+      track: auto ? '#E8A860' : '#453B31',
+      knob: auto ? 'flex-end' : 'flex-start',
+      flip: function () { self.setState({ auto: !self.state.auto }); },
+      test: function () { self.setState({ tested: true }); },
+      testLabel: this.state.tested ? 'Test passed: sound started in 3 s' : 'Test tonight\'s start'
+    };
+  }
+}
+</script>
+</body>
+</html>

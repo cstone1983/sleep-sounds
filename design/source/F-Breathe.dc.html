@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Slow breathing</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+body{margin:0}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #12100E; color: #F2E9DC; font-family: 'Manrope', sans-serif; display: flex; flex-direction: column; gap: 20px; padding: 18px 20px 24px; overflow: hidden">
+<div style="display: flex; align-items: center; gap: 8px">
+<a href="F-Meditate.dc.html" aria-label="Back to Meditate" style="width: 44px; height: 44px; display: flex; align-items: center; margin-left: -6px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"></path></svg></a>
+<h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 800">Slow breathing</h1>
+</div>
+
+<div style="flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px">
+<div style="width: 290px; height: 290px; display: flex; align-items: center; justify-content: center; border-radius: 145px; border: 1px solid #332C25">
+<div style="width: {{size}}px; height: {{size}}px; border-radius: 50%; background: #3A2A18; border: 2px solid #E8A860; box-sizing: border-box; display: flex; align-items: center; justify-content: center; transition: width {{secs}}s ease-in-out, height {{secs}}s ease-in-out">
+<span style="font-size: 22px; font-weight: 800">{{word}}</span>
+</div>
+</div>
+<p style="margin: 0; font-size: 16px; color: #C9BBA6">In for 4, out for 6 · 5 min</p>
+</div>
+
+<div style="display: flex; gap: 10px">
+<button type="button" onClick="{{toggle}}" style="flex: 1 1 0; height: 72px; border-radius: 36px; border: 0; background: #E8A860; color: #2A1C0C; font-size: 19px; font-weight: 800">{{action}}</button>
+</div>
+<p style="margin: 0; text-align: center; font-size: 14px; line-height: 21px; color: #C9BBA6">Screen too bright? Turn on vibration pacing and put the phone face down.</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { running: false, phase: 0 };
+  }
+  componentWillUnmount() { clearTimeout(this.timer); }
+  step() {
+    var self = this;
+    var next = this.state.phase === 0 ? 1 : 0;
+    this.setState({ phase: next });
+    this.timer = setTimeout(function () { self.step(); }, next === 0 ? 4000 : 6000);
+  }
+  renderVals() {
+    var self = this;
+    var st = this.state;
+    var inhale = st.running && st.phase === 0;
+    return {
+      size: inhale ? 250 : 120,
+      secs: st.phase === 0 ? 4 : 6,
+      word: !st.running ? 'Ready' : (inhale ? 'In' : 'Out'),
+      action: st.running ? 'Pause' : 'Begin',
+      toggle: function () {
+        if (self.state.running) {
+          clearTimeout(self.timer);
+          self.setState({ running: false, phase: 0 });
+        } else {
+          self.setState({ running: true, phase: 0 });
+          self.timer = setTimeout(function () { self.step(); }, 4000);
+        }
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

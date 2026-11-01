@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Paid-feature map</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+body{margin:0;background:#12100E}
+a{color:#E8A860}a:hover{color:#F4C48A}
+table{border-collapse:collapse;width:100%;min-width:860px;font-size:14px;line-height:21px}
+th{text-align:left;font-size:13px;font-weight:700;color:#C9BBA6;padding:10px 12px;border-bottom:1px solid #453B31}
+td{vertical-align:top;padding:11px 12px;border-bottom:1px solid #332C25;color:#D9CDBB}
+td:first-child{font-weight:700;color:#F2E9DC}
+h2{font-size:24px;line-height:32px;font-weight:800;color:#F2E9DC;margin:0 0 6px}
+.sub{margin:0 0 14px;font-size:15px;line-height:23px;color:#C9BBA6}
+.wrap{overflow-x:auto;border:1px solid #332C25;border-radius:16px;background:#1C1916}
+.card{background:#1C1916;border:1px solid #332C25;border-radius:16px;padding:20px;box-sizing:border-box}
+.card h3{margin:0 0 8px;font-size:17px;font-weight:700;color:#F2E9DC}
+.card p{font-size:15px;line-height:23px;color:#C9BBA6;margin:0}
+</style>
+</helmet>
+<main style="font-family: 'Manrope', sans-serif; background: #12100E; color: #F2E9DC; box-sizing: border-box; padding: 56px 32px 72px">
+<div style="max-width: 1216px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px">
+<header style="max-width: 820px">
+<h1 style="margin: 0 0 12px; font-size: 40px; line-height: 48px; font-weight: 800">What others charge for, and what we'd do</h1>
+<p style="margin: 0; font-size: 17px; line-height: 27px; color: #C9BBA6">The market splits in two: subscriptions around $40 to $70 a year funded by content, and one-time purchases of about $3 to $20 for sound-only apps. Everything below is free for you. The sorting only matters if this goes public.</p>
+</header>
+
+<section>
+<h2>Build for you now</h2>
+<p class="sub">Would stay free in a public version, except where marked.</p>
+<div class="wrap"><table>
+<thead><tr><th scope="col">Feature</th><th scope="col">Who has it</th><th scope="col">Effort</th><th scope="col">Note</th></tr></thead>
+<tbody>
+<tr><td>Layered mixer and saved mixes</td><td>Rain Rain free, Noisli caps favorites, BetterSleep paid</td><td>Easy</td><td>Never paywall someone's own mixes</td></tr>
+<tr><td>Sleep timer with fade</td><td>Rain Rain free, Noisli gates the advanced timer</td><td>Easy</td><td>Expected everywhere, don't charge</td></tr>
+<tr><td>Generated noise with no loop</td><td>myNoise, TMSOFT</td><td>Easy</td><td>Done on the phone, so no licensing. People do notice loops</td></tr>
+<tr><td>Drift and Soften</td><td>Noisli Pro, Rain Rain</td><td>Easy</td><td>Paid candidate</td></tr>
+<tr><td>Two-way Home Assistant and n8n control</td><td>Nobody found, for a sound app</td><td>Medium</td><td>The reason this app exists. Paid candidate</td></tr>
+<tr><td>Breathing and meditation timer</td><td>Calm, Insight Timer</td><td>Easy</td><td>Offline by design</td></tr>
+<tr><td>Pre-rendered guided sessions</td><td>Calm, Headspace, Balance</td><td>Medium</td><td>A few sessions, voiced once. Not a content library</td></tr>
+<tr><td>Output picker, including Sonos</td><td>Moshi has Chromecast, others vary</td><td>Medium</td><td>Sonos needs a prepared file. Paid candidate</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section>
+<h2>Good candidates for later</h2>
+<p class="sub">Worth doing after the core is reliable.</p>
+<div class="wrap"><table>
+<thead><tr><th scope="col">Feature</th><th scope="col">Who has it</th><th scope="col">Effort</th><th scope="col">Note</th></tr></thead>
+<tbody>
+<tr><td>Large sound library</td><td>BetterSleep, Rain Rain, Noisli</td><td>Easy to medium</td><td>The usual paywall gate. Use CC0 sources with records of where each came from</td></tr>
+<tr><td>Rule-based generated soundscapes</td><td>Endel style</td><td>Medium</td><td>Rules rather than machine learning</td></tr>
+<tr><td>Wake-up sound with sunrise lights</td><td>TMSOFT, Portal, Sleep as Android</td><td>Medium</td><td>Lights are easy through Home Assistant</td></tr>
+<tr><td>Eight Sleep driven fade</td><td>Unique to your home</td><td>Medium</td><td>Your bed presence sensor could shape the ending</td></tr>
+<tr><td>Binaural beats</td><td>Atmosphere, TMSOFT</td><td>Easy</td><td>A sound option only, with no benefit claims. Needs stereo headphones</td></tr>
+<tr><td>Watch remote</td><td>Not researched by app</td><td>Medium</td><td>Your Galaxy Watch Ultra could act as a remote</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section>
+<h2>Skip</h2>
+<p class="sub">Not worth the cost or risk for this app.</p>
+<div class="wrap"><table>
+<thead><tr><th scope="col">Feature</th><th scope="col">Who has it</th><th scope="col">Why not</th></tr></thead>
+<tbody>
+<tr><td>Sleep stories catalog</td><td>Calm, Headspace</td><td>Highly praised, but needs ongoing volume and voice quality</td></tr>
+<tr><td>Phone-based sleep tracking</td><td>Sleep Cycle, Sleep as Android</td><td>Weak accuracy, and your Eight Sleep already tracks sleep</td></tr>
+<tr><td>Insomnia programs</td><td>Stellar Sleep, SleepioRx</td><td>Treating insomnia is regulated medical device territory</td></tr>
+<tr><td>Snore recording</td><td>Sleep Cycle, Sleep as Android</td><td>Needs a classifier, microphone rules and a user-started recording service</td></tr>
+<tr><td>Biometric adaptive sound</td><td>Endel</td><td>Hard to build, and reviewers question its value</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
+<div class="card"><h3>If it goes public</h3><p>Free core with a one-time unlock, plus an optional subscription only for anything with ongoing value. People resent subscriptions for simple noise apps. Google's fee can be higher on one-time purchases than subscriptions in major markets, so check it before setting a price.</p></div>
+<div class="card"><h3>Sound sources</h3><p>Freesound CC0 and BY files are usable, with a credits page for BY. Avoid BY-NC. Pixabay bars standalone distribution, so don't ship raw clips from it. Get a legal read before shipping AI music publicly, because terms and copyright are unsettled.</p></div>
+<div class="card"><h3>What not to claim</h3><p>Evidence for sleep noise is weak, and a small 2026 study linked pink noise to less REM sleep. Use "relax" and "wind down", and avoid "treats insomnia" or "boosts deep sleep". Add volume guidance and a default auto-off.</p></div>
+</section>
+
+<section class="card">
+<h3>How far to trust this</h3>
+<p>Prices are mostly from iOS listings and third-party trackers, and some sources conflict. Play listings wouldn't load, so check every Android price before relying on it. Value judgments are my inference from what competitors paywall and the reviews I could reach.</p>
+</section>
+</div>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

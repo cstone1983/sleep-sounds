@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Soundscape timer</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap">
+<style>
+body{margin:0}
+a{color:inherit;text-decoration:none}
+.q{height:56px;border-radius:16px;border:1px solid #2B5057;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;box-sizing:border-box}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; box-sizing: border-box; background: #07171A; color: #E4F1EE; font-family: 'Sora', sans-serif; display: flex; flex-direction: column; gap: 22px; padding: 24px 20px; overflow: hidden">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<h1 style="margin: 0; font-size: 22px; line-height: 30px; font-weight: 700">Sleep timer</h1>
+<a href="C-Tonight.dc.html" style="min-height: 44px; min-width: 44px; display: flex; align-items: center; justify-content: flex-end; font-size: 14px; font-weight: 600; color: #7FD6C2">Done</a>
+</div>
+<div style="position: relative; width: 300px; height: 300px; align-self: center; margin-top: 12px">
+<svg width="300" height="300" viewBox="0 0 300 300" aria-hidden="true" style="position: absolute; inset: 0">
+<circle cx="150" cy="150" r="128" fill="none" stroke="#1F3D42" stroke-width="20"></circle>
+<path d="M150 22a128 128 0 1 1-128 128" fill="none" stroke="#7FD6C2" stroke-width="20" stroke-linecap="round"></path>
+<circle cx="22" cy="150" r="18" fill="#E4F1EE"></circle>
+</svg>
+<div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
+<span style="font-size: 54px; line-height: 62px; font-weight: 700">45</span>
+<span style="font-size: 16px; color: #CFE4E0">minutes</span>
+<span style="font-size: 14px; color: #A9C6C1; margin-top: 6px">Silent by 10:27 PM</span>
+</div>
+</div>
+<p style="margin: 0; text-align: center; font-size: 15px; line-height: 23px; color: #CFE4E0">Drag the dial. The scene dims with the sound as the timer runs out.</p>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+<div class="q">15</div><div class="q">30</div><div class="q" style="border-color: #7FD6C2; color: #7FD6C2">45</div><div class="q">60</div>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center; min-height: 64px; padding: 0 16px; border: 1px solid #1F3D42; border-radius: 16px; background: #0F2529">
+<span style="font-size: 15px; font-weight: 600">Fade out</span>
+<span style="font-size: 15px; font-weight: 600; color: #7FD6C2">10 min</span>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

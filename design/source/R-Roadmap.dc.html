@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Risks, roadmap, sources</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+body{margin:0;background:#12100E}
+a{color:#E8A860}a:hover{color:#F4C48A}
+h2{font-size:26px;line-height:34px;font-weight:800;color:#F2E9DC;margin:0 0 14px}
+.card{background:#1C1916;border:1px solid #332C25;border-radius:16px;padding:20px;box-sizing:border-box}
+.card h3{margin:0 0 8px;font-size:17px;line-height:24px;font-weight:700;color:#F2E9DC}
+.card p{font-size:15px;line-height:23px;color:#C9BBA6;margin:0}
+.k{font-size:13px;font-weight:800;color:#E8A860;margin:0 0 6px}
+ul.src{margin:0;padding-left:18px;columns:2 320px;column-gap:32px}
+ul.src li{font-size:14px;line-height:24px;color:#C9BBA6;break-inside:avoid}
+</style>
+</helmet>
+<main style="font-family: 'Manrope', sans-serif; background: #12100E; color: #F2E9DC; box-sizing: border-box; padding: 56px 32px 72px">
+<div style="max-width: 1216px; margin: 0 auto; display: flex; flex-direction: column; gap: 44px">
+<header style="max-width: 820px">
+<h1 style="margin: 0 0 12px; font-size: 40px; line-height: 48px; font-weight: 800">What could go wrong, and the build order</h1>
+<p style="margin: 0; font-size: 17px; line-height: 27px; color: #C9BBA6">The riskiest assumption is that sound can start by itself, overnight, on your phone. So that gets tested before anything else is built.</p>
+</header>
+
+<section>
+<h2>Risks</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px">
+<div class="card"><h3>Silent failure</h3><p>On Android 17, audio from an app without the right background rights can fail with no error. The app could report "playing" with no sound, which is why it must confirm real audio before reporting.</p></div>
+<div class="card"><h3>Samsung battery management</h3><p>Samsung can put unused apps to sleep, and updates can reset the setting. There's no developer fix, so the Ready check on the Routine screen has to catch it.</p></div>
+<div class="card"><h3>Overnight battery and heat</h3><p>Mixing layers means Android can't use its low-power audio path. No 8-hour figure was found for this, so measure it on your phone. The charger helps.</p></div>
+<div class="card"><h3>Seams in loops</h3><p>MP3 loops are prone to gaps. Use FLAC or WAV, crossfade in the app, and test every sound. Opus trimming fixes are still in an alpha Media3 release.</p></div>
+<div class="card"><h3>Sonos file hosting</h3><p>The prepared mix has to live somewhere Sonos can reach, and looping support varies. A long rendered file hosted on Home Assistant is the plan, and it needs a test.</p></div>
+<div class="card"><h3>Going public later</h3><p>Apps targeting API 37 lose unattended phone start unless a workaround survives testing. Google Play also expects user-started playback for this service type. This could change the auto-start design.</p></div>
+</div>
+</section>
+
+<section>
+<h2>Build order</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px">
+<div class="card" style="border-color: #E8A860"><p class="k">Step 1, prove it</p><h3>Small test app on your Fold 7</h3><p>A Home Assistant broadcast starts sound with the screen off. Run it overnight, measure battery, and listen for seams.</p></div>
+<div class="card"><p class="k">Step 2</p><h3>Core player</h3><p>Mixer, timer, saved mixes, media notification, first set of sounds, and generated noise.</p></div>
+<div class="card"><p class="k">Step 3</p><h3>Night routine</h3><p>Script step, confirmation, fallback notification, backup time, MQTT entities, and n8n webhook.</p></div>
+<div class="card"><p class="k">Step 4</p><h3>Outputs</h3><p>Picker, Bluetooth, Cast, and Sonos through Home Assistant with a prepared mix.</p></div>
+<div class="card"><p class="k">Step 5</p><h3>Meditation</h3><p>Breathing, quiet timer, and scripts. Then a listening test between OpenAI TTS and Kokoro.</p></div>
+<div class="card"><p class="k">Step 6</p><h3>Finish</h3><p>Night dim, widget, Quick Settings tile. A watch remote and a public release come after that.</p></div>
+</div>
+</section>
+
+<section>
+<h2>Sources</h2>
+<div class="card">
+<ul class="src">
+<li><a href="https://developer.android.com/about/versions/17/changes/bg-audio">Android 17 background audio</a></li>
+<li><a href="https://developer.android.com/develop/background-work/services/fgs/restrictions-bg-start">Foreground service start rules</a></li>
+<li><a href="https://developer.android.com/media/media3/session/background-playback">Media3 background playback</a></li>
+<li><a href="https://dontkillmyapp.com/samsung">Don't Kill My App: Samsung</a> (undated)</li>
+<li><a href="https://support.google.com/googleplay/android-developer/answer/13392821">Play foreground service declaration</a></li>
+<li><a href="https://www.home-assistant.io/integrations/mqtt/">Home Assistant MQTT platforms</a></li>
+<li><a href="https://companion.home-assistant.io/docs/notifications/notification-commands">Companion notification commands</a></li>
+<li><a href="https://www.home-assistant.io/actions/media_player.play_media/">media_player.play_media</a></li>
+<li><a href="https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/">n8n Webhook node</a></li>
+<li><a href="https://sleep.urbandroid.org/docs/services/automation.html">Sleep as Android automation</a></li>
+<li><a href="https://www.home-assistant.io/integrations/sleep_as_android/">Sleep as Android integration</a></li>
+<li><a href="https://intercom.help/BetterSleep/en/articles/11101160-bettersleep-getting-started-guide">BetterSleep getting started</a></li>
+<li><a href="https://apps.apple.com/us/app/rain-rain-sleep-sounds/id478687481">Rain Rain listing</a> (iOS)</li>
+<li><a href="https://mynoise.net/NoiseMachines/help.php">myNoise help</a></li>
+<li><a href="https://www.noisli.com/pricing">Noisli pricing</a></li>
+<li><a href="https://screensdesign.com/apps/tide-sleep-focus-meditation/?vs=341973">Tide screens</a> (third-party capture)</li>
+<li><a href="https://pennmedicine.org/news/pink-noise-reduces-rem-sleep-and-may-harm-sleep-quality">Pink noise and REM, Penn Medicine</a> (small study)</li>
+<li><a href="https://pubmed.ncbi.nlm.nih.gov/34964434/">White and pink noise review</a></li>
+<li><a href="https://pubmed.ncbi.nlm.nih.gov/37205669/">Binaural beats review</a></li>
+<li><a href="https://support.google.com/googleplay/android-developer/answer/112622">Google Play service fees</a></li>
+<li><a href="https://freesound.org/help/faq/">Freesound FAQ</a></li>
+<li><a href="https://pixabay.com/service/license-summary/">Pixabay license summary</a></li>
+<li><a href="https://huggingface.co/hexgrad/Kokoro-82M">Kokoro voice model</a></li>
+</ul>
+</div>
+</section>
+</div>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

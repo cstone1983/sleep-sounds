@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sleep sounds app: start here</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+body{margin:0;background:#12100E}
+a{color:#E8A860}a:hover{color:#F4C48A}
+.card{background:#1C1916;border:1px solid #332C25;border-radius:16px;padding:24px;box-sizing:border-box}
+.k{font-size:13px;font-weight:700;color:#C9BBA6;margin:0 0 8px}
+.h{font-size:19px;line-height:26px;font-weight:700;color:#F2E9DC;margin:0 0 8px}
+.p{font-size:15px;line-height:23px;color:#C9BBA6;margin:0}
+h2{font-size:26px;line-height:34px;font-weight:800;color:#F2E9DC;margin:0 0 16px}
+</style>
+</helmet>
+<main style="font-family: 'Manrope', sans-serif; background: #12100E; color: #F2E9DC; box-sizing: border-box; padding: 56px 32px 72px">
+<div style="max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px">
+
+<header style="display: flex; flex-direction: column; gap: 16px; max-width: 820px">
+<p style="margin: 0; font-size: 14px; font-weight: 700; color: #E8A860">Android sleep sounds app · design proposal · November 2026</p>
+<h1 style="margin: 0; font-size: 46px; line-height: 54px; font-weight: 800">A bedtime app that starts itself when your house goes to Night</h1>
+<p style="margin: 0; font-size: 18px; line-height: 28px; color: #C9BBA6">Nothing I found combines a sound mixer with two-way Home Assistant control. That is the reason to build this. The rest of the design answers the complaints people repeat about other apps: audio stopping overnight, timers hidden away, saved mixes that get buried.</p>
+</header>
+
+<section>
+<h2>What I recommend</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px">
+<div class="card"><p class="k">Layout</p><p class="h">Direction B, with A's tile grid inside the mixer</p><p class="p">One Tonight card with a large Start button. The lit tiles you already know from your current app live one tap away.</p></div>
+<div class="card"><p class="k">Start signal</p><p class="h">Add a step to your nightly shutdown script</p><p class="p">Your phone is on the charger when that script runs, which is the best moment for Android to wake the app. The app confirms real audio, and Home Assistant sends a one-tap notification if it doesn't.</p></div>
+<div class="card"><p class="k">Sound</p><p class="h">Phone speaker by default, output picker for the rest</p><p class="p">Bluetooth and Cast come from Android. Sonos and TVs come from Home Assistant's media player list, so detection needs no scanning of your network.</p></div>
+<div class="card"><p class="k">Meditation</p><p class="h">Written once, voiced once, played forever</p><p class="p">Scripts come from a session like this one. Voice is rendered one time to audio files. Playback never touches an API.</p></div>
+</div>
+</section>
+
+<section>
+<h2>What's on this canvas</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px">
+<a href="A-Tonight.dc.html" class="card" style="text-decoration: none; display: block"><p class="h">Three directions</p><p class="p">Home, mixer and timer in three different styles, using the same sample content.</p></a>
+<a href="F-NowPlaying.dc.html" class="card" style="text-decoration: none; display: block"><p class="h">Recommended flow</p><p class="p">Eight more screens: playing, night dim, output, routine, meditation, mixes and widgets.</p></a>
+<a href="R-Competitors.dc.html" class="card" style="text-decoration: none; display: block"><p class="h">Competitor layouts</p><p class="p">What other apps do, where they fall short, and what's worth taking.</p></a>
+<a href="R-Features.dc.html" class="card" style="text-decoration: none; display: block"><p class="h">Paid-feature map</p><p class="p">What competitors charge for, sorted into build now, keep for paid, and skip.</p></a>
+<a href="R-Architecture.dc.html" class="card" style="text-decoration: none; display: block"><p class="h">How auto-start works</p><p class="p">The path from your night script to sound, including every fallback.</p></a>
+<a href="R-Roadmap.dc.html" class="card" style="text-decoration: none; display: block"><p class="h">Risks, roadmap, sources</p><p class="p">What could go wrong, the build order, and where each finding came from.</p></a>
+</div>
+</section>
+
+<section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
+<div class="card">
+<h2 style="font-size: 22px">What these renders are</h2>
+<p class="p">Design concepts with sample content, not a working app. Tiles, the timer, the output picker and the bottom tabs respond when you press Play on those artboards, but there's no audio. Device and script names come from your real Home Assistant setup.</p>
+</div>
+<div class="card">
+<h2 style="font-size: 22px">What isn't proven yet</h2>
+<p class="p">No apps were installed for this research, so many layout details come from iOS listings and third-party captures. Android prices need checking. Auto-start hasn't been tested on your Fold 7, and overnight battery use hasn't been measured. Testing both is the first build step.</p>
+</div>
+</section>
+
+</div>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1320}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
