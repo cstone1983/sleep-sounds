@@ -1,11 +1,13 @@
 """Turns guided/scripts/*.txt into audio for the app. Run once per script change.
 
 Each line is spoken. "~8" means 8 seconds of silence, and lines without one get a short gap.
+Lines are voiced a phrase at a time, because the model hurries through anything longer.
 Rendering is local, so sessions cost nothing to make or to play.
 
   python render.py <folder with kokoro-v1.0.onnx and voices-v1.0.bin>
 """
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -14,12 +16,18 @@ import soundfile
 from kokoro_onnx import Kokoro
 
 VOICE = "af_heart"
-SPEED = 0.82
+SPEED = 0.74
 RATE = 24_000
-LINE_GAP = 1.6
+LINE_GAP = 2.4
+SENTENCE_GAP = 1.6
+PHRASE_GAP = 0.7
 
 HERE = Path(__file__).parent
 OUT = HERE.parent / "app/src/main/assets/guided"
+
+
+def silence(seconds):
+    return np.zeros(int(seconds * RATE), dtype=np.float32)
 
 
 def render(kokoro, script):
@@ -32,12 +40,14 @@ def render(kokoro, script):
         if line.startswith("# "):
             title = line[2:]
         elif line.startswith("~"):
-            parts.append(np.zeros(int(float(line[1:]) * RATE), dtype=np.float32))
+            parts.append(silence(float(line[1:])))
         else:
-            samples, rate = kokoro.create(line, voice=VOICE, speed=SPEED, lang="en-us")
-            assert rate == RATE
-            parts.append(samples.astype(np.float32))
-            parts.append(np.zeros(int(LINE_GAP * RATE), dtype=np.float32))
+            for phrase in re.split(r"(?<=[.?!,])\s+", line):
+                samples, rate = kokoro.create(phrase, voice=VOICE, speed=SPEED, lang="en-us")
+                assert rate == RATE
+                parts.append(samples.astype(np.float32))
+                parts.append(silence(PHRASE_GAP if phrase.endswith(",") else SENTENCE_GAP))
+            parts[-1] = silence(LINE_GAP)
     audio = np.concatenate(parts)
     peak = float(np.max(np.abs(audio)))
     return title, audio * (0.7 / peak)

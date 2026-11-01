@@ -99,6 +99,9 @@ class ScreensTest {
     compose.onNodeWithText("Settings").performClick()
     compose.waitForIdle()
     compose.onNodeWithText("Test n8n").assertExists()
+    compose.onNodeWithText("Allow remote control").assertIsDisplayed().performClick()
+    compose.waitForIdle()
+    compose.onNodeWithText("Off").assertIsDisplayed()
   }
 
   @Test

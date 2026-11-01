@@ -6,10 +6,10 @@ data class Guided(val id: String, val title: String, val note: String, val minut
 }
 
 val GUIDED = listOf(
-  Guided("slow_countdown", "Slow countdown", "Ten down to one, then silence", 5),
-  Guided("letting_go", "Letting go of the day", "Set down what's on your mind", 7),
-  Guided("body_scan", "Body scan", "Head-to-toe heaviness and ease", 9),
-  Guided("deep_rest", "Deep rest", "A yoga nidra style rotation", 9),
+  Guided("slow_countdown", "Slow countdown", "Ten down to one, then silence", 6),
+  Guided("letting_go", "Letting go of the day", "Set down what's on your mind", 8),
+  Guided("body_scan", "Body scan", "Head-to-toe heaviness and ease", 11),
+  Guided("deep_rest", "Deep rest", "A yoga nidra style rotation", 10),
 )
 
 fun guidedById(id: String?) = GUIDED.firstOrNull { it.id == id }

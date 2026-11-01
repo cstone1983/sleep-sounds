@@ -284,6 +284,7 @@ fun RoutineScreen(mix: Mix, tonight: Tonight) {
   val background = remember(tick) { batteryOpen(context) }
   val notifications = remember(tick) { notificationsOn(context) }
   val connected = remember(tick) { Connections.haTarget(context) != null || Connections.n8nTarget(context) != null }
+  val remote = remember(tick) { Connections.remoteAllowed(context) }
   val last = remember(tick) { Connections.lastStart(context) }
   Column(
     Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 16.dp),
@@ -300,6 +301,7 @@ fun RoutineScreen(mix: Mix, tonight: Tonight) {
       Check("Background start allowed", background)
       Check("Notifications allowed", notifications)
       Check("Connected to an automation", connected)
+      Check("Remote control allowed", remote)
       Fact("Last automatic start", last.ifEmpty { "None yet" })
     }
     if (!background) PrimaryButton("Allow background start") { askToRemoveBatteryLimits(context) }
@@ -334,6 +336,7 @@ fun SettingsScreen() {
   var n8nUrl by remember { mutableStateOf(Connections.get(context, Connections.N8N_URL)) }
   var n8nHeader by remember { mutableStateOf(Connections.get(context, Connections.N8N_HEADER)) }
   var n8nValue by remember { mutableStateOf(Connections.get(context, Connections.N8N_VALUE)) }
+  var remote by remember { mutableStateOf(Connections.remoteAllowed(context)) }
   var help by remember { mutableStateOf<Help?>(null) }
   fun toast(text: String) = Toast.makeText(context, text, Toast.LENGTH_LONG).show()
   fun test(target: Target?) {
@@ -357,6 +360,19 @@ fun SettingsScreen() {
   ) {
     Text("Settings", style = style(28, FontWeight.ExtraBold))
     Text("Connections are optional. Nightfall works without them.", style = style(14, color = Muted))
+    Card(
+      Modifier.fillMaxWidth().heightIn(min = 64.dp),
+      onClick = {
+        remote = !remote
+        Connections.setRemoteAllowed(context, remote)
+      },
+    ) {
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Text("Allow remote control", Modifier.weight(1f), style = style(15, FontWeight.SemiBold))
+        Text(if (remote) "On" else "Off", style = style(14, FontWeight.ExtraBold, if (remote) Amber else Faint))
+      }
+    }
+    Text("When off, Home Assistant and n8n can't start or control Nightfall.", style = style(13, color = Muted))
     SectionHeading("Home Assistant", "How to connect Home Assistant") { help = Help.HOME_ASSISTANT }
     Field("Server URL", haUrl, "http://homeassistant.local:8123") { haUrl = it; Connections.set(context, Connections.HA_URL, it) }
     Field("Webhook ID", haWebhook, secret = true) { haWebhook = it; Connections.set(context, Connections.HA_WEBHOOK, it) }

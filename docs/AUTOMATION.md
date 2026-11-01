@@ -11,6 +11,8 @@ Nightfall doesn't need any of this to work. Every connection is optional, and de
 
 Commands are Android broadcasts sent to the app package, `com.cstone.nightfall`. Every command must include the automation key shown in the **Settings** tab. Anything else is ignored and logged as `REJECTED`.
 
+**Allow remote control** in the **Settings** tab turns all of these commands off. Nothing starts or changes, and a `START` reports `remote_off` so your automation can stop there. Controls in the app and its notification keep working.
+
 | Action | What it does | Extras |
 |---|---|---|
 | `<package>.START` | Starts tonight's mix | `key`, plus optional `secs` (0 means no timer), `gain` (1 to 100) `mix` (a mix name) and `session` (a guided session: `slow_countdown`, `letting_go`, `body_scan` or `deep_rest`) |
@@ -75,6 +77,7 @@ Each event is a JSON POST:
 |---|---|
 | `started` | Audio is confirmed running |
 | `start_failed` | It didn't start. `reason` is `background_start_denied`, `foreground_denied` or `audio_not_confirmed` |
+| `remote_off` | A start was ignored because **Allow remote control** is off |
 | `paused`, `resumed`, `time_added` | A control was used |
 | `guided_finished` | A guided session's voice ended. Sounds may keep playing |
 | `timer_ended` | The sleep timer finished |
@@ -93,6 +96,6 @@ This is one way to connect them. Adjust the names for your own setup.
 4. Create a Home Assistant script that:
    - sets the text helper to `starting`
    - sends the start command above
-   - waits up to 25 seconds for the helper to change to `started` or `start_failed`
-   - sends the one-tap notification if it isn't `started`
+   - waits up to 25 seconds for the helper to change to `started`, `start_failed` or `remote_off`
+   - sends the one-tap notification if it's neither `started` nor `remote_off`
 5. Run that script from your bedtime routine, only when the autostart switch is on.

@@ -21,6 +21,7 @@ object Connections {
   const val N8N_VALUE = "n8n_value"
   private const val KEY = "automation_key"
   private const val LAST_START = "last_start"
+  private const val REMOTE = "remote_control"
 
   private fun prefs(context: Context): SharedPreferences =
     context.getSharedPreferences("nightfall", Context.MODE_PRIVATE)
@@ -29,6 +30,13 @@ object Connections {
 
   fun set(context: Context, name: String, value: String) {
     prefs(context).edit().putString(name, value.trim()).apply()
+  }
+
+  /** When off, automation commands do nothing. Controls in the app and notification still work. */
+  fun remoteAllowed(context: Context): Boolean = prefs(context).getBoolean(REMOTE, true)
+
+  fun setRemoteAllowed(context: Context, allowed: Boolean) {
+    prefs(context).edit().putBoolean(REMOTE, allowed).apply()
   }
 
   /** Commands must carry this, so other apps on the phone can't trigger playback. */

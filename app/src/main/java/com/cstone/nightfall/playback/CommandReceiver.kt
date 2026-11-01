@@ -16,6 +16,15 @@ class CommandReceiver : BroadcastReceiver() {
       Log.w("Nightfall", "rejected $command: wrong or missing key")
       return
     }
+    if (!Connections.remoteAllowed(context)) {
+      Log.i("Nightfall", "ignored $command: remote control is off")
+      if (command == "START") {
+        Connections.recordStart(context, "Ignored, remote control off")
+        val pending = goAsync()
+        Reporter.send(context, "remote_off") { pending.finish() }
+      }
+      return
+    }
     val service = Intent(context, PlaybackService::class.java).putExtras(intent).apply { removeExtra("key") }
     when (command) {
       "STOP" -> Player.stop()
