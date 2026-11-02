@@ -15,7 +15,7 @@ Commands are Android broadcasts sent to the app package, `com.cstone.nightfall`.
 
 | Action | What it does | Extras |
 |---|---|---|
-| `<package>.START` | Starts tonight's mix | `key`, plus optional `secs` (0 means no timer), `gain` (1 to 100) `mix` (a mix name) and `session` (a guided session: `slow_countdown`, `letting_go`, `body_scan` or `deep_rest`) |
+| `<package>.START` | Starts tonight's mix | `key`, plus optional `secs` (0 means no timer), `gain` (1 to 100) `mix` (a mix name), `session` (a guided session: `slow_countdown`, `letting_go`, `body_scan` or `deep_rest`) and `speaker` (a Wi-Fi speaker's room name, or `phone`) |
 | `<package>.STOP` | Stops playback | `key` |
 | `<package>.TOGGLE` | Pauses or resumes | `key` |
 | `<package>.ADD15` | Adds 15 minutes to the timer | `key` |
@@ -72,6 +72,7 @@ Each event is a JSON POST:
   "target_sdk": 36,
   "ok": true,
   "focus": 1,
+  "output": "phone",
   "seconds_left": 2697,
   "ends_at": 1793542700000
 }
@@ -82,6 +83,8 @@ Each event is a JSON POST:
 | `started` | Audio is confirmed running |
 | `start_failed` | It didn't start. `reason` is `background_start_denied`, `foreground_denied` or `audio_not_confirmed` |
 | `remote_off` | A start was ignored because **Allow remote control** is off |
+| `speaker_failed` | The Wi-Fi speaker couldn't be reached, so the mix is playing on the phone instead. A `started` event follows |
+| `speaker_lost` | The Wi-Fi speaker stopped playing, either from its own app or because it dropped off the network, so the session ended |
 | `paused`, `resumed`, `time_added` | A control was used |
 | `guided_finished` | A guided session's voice ended. Sounds may keep playing |
 | `timer_ended` | The sleep timer finished |
@@ -89,6 +92,15 @@ Each event is a JSON POST:
 | `test` | Sent by a test button |
 
 If the phone can't start at all, it may not be able to report that. Treat a missing `started` event after about 20 seconds as a failure.
+
+## Playing on other speakers
+
+**Change output** searches for speakers when it opens.
+
+- **Wi-Fi:** Sonos and DLNA speakers. Pick one and every start plays there, including starts from an automation. The phone makes the sound and streams it to the speaker, so it has to stay on the same network, and it uses more battery than playing on its own speaker. Timers and fades work the same.
+- **Bluetooth:** connected speakers can be picked straight away. Nearby ones can be paired from the list. Android doesn't let apps connect a speaker that's already paired, so those open Bluetooth settings.
+
+Google Cast and AirPlay speakers aren't supported. A guided session's voice always plays on the phone, even when its sounds play on a Wi-Fi speaker.
 
 ## A worked example: Home Assistant and n8n together
 

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.media.AudioDeviceInfo
 import com.cstone.nightfall.data.Layer
+import com.cstone.nightfall.data.Speaker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -20,6 +21,7 @@ data class PlayState(
   val voiceTotalMs: Long = 0,
   val soundLevel: Int = 45,
   val voiceLevel: Int = 80,
+  val speaker: String = "",
 )
 
 /** The UI's view of playback. The service publishes here, and the UI sends commands through it. */
@@ -55,4 +57,5 @@ object Player {
   fun addTime() { service?.addTime() }
   fun updateLayers(layers: List<Layer>) { service?.updateLayers(layers) }
   fun setOutput(device: AudioDeviceInfo?) { service?.setOutput(device) }
+  fun setSpeaker(speaker: Speaker?) { service?.setSpeaker(speaker) }
 }

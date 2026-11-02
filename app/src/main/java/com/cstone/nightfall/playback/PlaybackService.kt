@@ -17,6 +17,7 @@ import android.media.MediaMetadata
 import android.media.MediaPlayer
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
+import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -28,11 +29,14 @@ import com.cstone.nightfall.R
 import com.cstone.nightfall.audio.MixEngine
 import com.cstone.nightfall.connect.Connections
 import com.cstone.nightfall.connect.Reporter
+import com.cstone.nightfall.connect.SpeakerSearch
 import com.cstone.nightfall.data.Layer
 import com.cstone.nightfall.data.Mix
+import com.cstone.nightfall.data.Speaker
 import com.cstone.nightfall.data.Store
 import com.cstone.nightfall.data.Guided
 import com.cstone.nightfall.data.guidedById
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -48,8 +52,13 @@ class PlaybackService : Service() {
   private lateinit var audio: AudioManager
   private var focus: AudioFocusRequest? = null
   private var engine: MixEngine? = null
+  private var remote: RemoteOutput? = null
+  private var connection = 0
   private var session: MediaSession? = null
   private var wakeLock: PowerManager.WakeLock? = null
+  private var wifiLock: WifiManager.WifiLock? = null
+  private val core get() = remote?.core ?: engine?.core
+  private val verifier = Runnable { verify() }
 
   private var running = false
   private var paused = false
@@ -143,29 +152,138 @@ class PlaybackService : Service() {
       .setUsage(AudioAttributes.USAGE_MEDIA)
       .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
       .build()
-    focus = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-      .setAudioAttributes(attributes)
-      .setOnAudioFocusChangeListener(::onFocusChange)
-      .build()
-    focusResult = audio.requestAudioFocus(focus!!)
-
-    engine = MixEngine(attributes).also {
-      it.onError = { code -> Log.w("Nightfall", "audio write failed: $code") }
-      it.core.setLayers(layers)
-      it.core.master = gain
-      preferredDevice(tonight.outputId)?.let(it::setOutput)
-      it.start()
-    }
     wakeLock = getSystemService(PowerManager::class.java)
       .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Nightfall:playback")
       .apply { acquire(14 * 60 * 60 * 1000L) }
 
     running = true
     Player.service = this
+    Preview.stop()
+    val named = intent?.getStringExtra(EXTRA_SPEAKER)
+    when {
+      named.equals("phone", ignoreCase = true) -> playOnPhone()
+      !named.isNullOrEmpty() -> connect(tonight.speaker?.takeIf { it.name.equals(named, ignoreCase = true) }, named)
+      tonight.speaker != null -> connect(tonight.speaker, tonight.speaker.id)
+      else -> playOnPhone()
+    }
     guided?.let { playVoice(it) }
     publish()
     handler.post(tick)
-    handler.postDelayed({ verify() }, 2_000)
+  }
+
+  private fun playOnPhone() {
+    focus = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+      .setAudioAttributes(attributes)
+      .setOnAudioFocusChangeListener(::onFocusChange)
+      .build()
+    focusResult = audio.requestAudioFocus(focus!!)
+    engine = MixEngine(attributes).also {
+      it.onError = { code -> Log.w("Nightfall", "audio write failed: $code") }
+      it.core.setLayers(layers)
+      it.core.master = gain
+      preferredDevice(Store.get(this).tonight.value.outputId)?.let(it::setOutput)
+      it.start()
+    }
+    if (paused) engine?.pause()
+    scheduleVerify()
+  }
+
+  /** Tries the saved address first, then searches in case the speaker has moved. */
+  private fun connect(saved: Speaker?, wanted: String) {
+    val attempt = ++connection
+    val mix = layers
+    val level = gain
+    Thread({
+      val output = openSpeaker(saved, wanted, mix, level)
+      handler.post {
+        if (running && attempt == connection) attach(output) else output?.release()
+      }
+    }, "nightfall-speaker").start()
+  }
+
+  private fun openSpeaker(saved: Speaker?, wanted: String, mix: List<Layer>, level: Float): RemoteOutput? {
+    val options = sequence {
+      saved?.let { yield(it) }
+      SpeakerSearch.find(wanted)?.let { yield(it) }
+    }
+    for (speaker in options) {
+      val output = RemoteOutput(speaker) { lost -> handler.post { onSpeakerLost(lost) } }
+      output.core.setLayers(mix)
+      output.core.master = level
+      try {
+        output.open()
+        return output
+      } catch (e: IOException) {
+        Log.w("Nightfall", "couldn't reach ${speaker.name}: $e")
+        output.release()
+      }
+    }
+    return null
+  }
+
+  private fun attach(output: RemoteOutput?) {
+    if (output == null) {
+      fallBackToPhone()
+      return
+    }
+    remote = output
+    output.core.setLayers(layers)
+    applyFade()
+    Store.get(this).run {
+      if (tonight.value.speaker?.id == output.speaker.id) setTonight(tonight.value.copy(speaker = output.speaker))
+    }
+    wifiLock = getSystemService(WifiManager::class.java)
+      .createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "Nightfall:speaker")
+      .apply { acquire() }
+    lastText = ""
+    publish()
+    scheduleVerify()
+  }
+
+  /** A quiet night is worse than the wrong speaker, so the mix carries on from the phone. */
+  private fun fallBackToPhone() {
+    Log.w("Nightfall", "speaker unavailable, playing on the phone")
+    Reporter.send(this, "speaker_failed", report(false))
+    closeRemote()
+    playOnPhone()
+    publish()
+  }
+
+  private fun onSpeakerLost(lost: RemoteOutput) {
+    if (lost !== remote) return
+    Log.i("Nightfall", "speaker stopped playing")
+    stopReason = "speaker_lost"
+    stopSelf()
+  }
+
+  private fun closeRemote() {
+    remote?.release()
+    remote = null
+    wifiLock?.takeIf { it.isHeld }?.release()
+    wifiLock = null
+  }
+
+  private fun closePhone() {
+    engine?.release()
+    engine = null
+    focus?.let { audio.abandonAudioFocusRequest(it) }
+    focus = null
+  }
+
+  /** Moves a running session to another output. A null speaker means the phone. */
+  fun setSpeaker(speaker: Speaker?) {
+    if (speaker?.id == remote?.speaker?.id && (speaker != null || engine != null)) return
+    connection++
+    closeRemote()
+    closePhone()
+    if (speaker == null) playOnPhone() else connect(speaker, speaker.id)
+    lastText = ""
+    publish()
+  }
+
+  private fun scheduleVerify() {
+    handler.removeCallbacks(verifier)
+    handler.postDelayed(verifier, 2_000)
   }
 
   private fun playVoice(session: Guided) {
@@ -249,6 +367,16 @@ class PlaybackService : Service() {
 
   /** "Started" means focus was granted and the output is consuming audio. */
   private fun verify() {
+    remote?.let { speaker ->
+      Thread({
+        val ok = speaker.confirm()
+        handler.post {
+          if (speaker !== remote) return@post
+          if (ok) confirmStart() else fallBackToPhone()
+        }
+      }, "nightfall-verify").start()
+      return
+    }
     val output = engine ?: return
     val stamp = AudioTimestamp()
     val first = if (output.track.getTimestamp(stamp)) stamp.framePosition else -1L
@@ -259,15 +387,20 @@ class PlaybackService : Service() {
       val ok = focusResult == AudioManager.AUDIOFOCUS_REQUEST_GRANTED && current.lastWrite > 0 && advancing
       Log.i("Nightfall", "verify ok=$ok focus=$focusResult head=$first->$second")
       if (ok) {
-        confirmed = true
-        if (automation) Connections.recordStart(this, "Started on time")
-        Reporter.send(this, "started", report(true))
-        publish()
+        confirmStart()
       } else {
         // Android mutes without an error, and frames keep advancing, so refused focus is a failed start.
         fail("audio_not_confirmed")
       }
     }, 1_000)
+  }
+
+  private fun confirmStart() {
+    if (confirmed) return
+    confirmed = true
+    if (automation) Connections.recordStart(this, "Started on time")
+    Reporter.send(this, "started", report(true))
+    publish()
   }
 
   private fun fail(reason: String) {
@@ -281,6 +414,7 @@ class PlaybackService : Service() {
     "ok" to ok,
     "focus" to focusResult,
     "mix" to title,
+    "output" to (remote?.speaker?.name ?: "phone"),
     "seconds_left" to if (hasTimer) timeLeft() / 1000 else null,
     "ends_at" to if (hasTimer && !paused) System.currentTimeMillis() + timeLeft() else null,
   )
@@ -291,10 +425,12 @@ class PlaybackService : Service() {
     if (paused) {
       remainingMs = timeLeft(counting = true)
       engine?.pause()
+      remote?.pause()
       voice?.pause()
     } else {
       resumedAt = System.currentTimeMillis()
       engine?.resume()
+      remote?.resume()
       voice?.start()
     }
     Reporter.send(this, if (paused) "paused" else "resumed", report(true))
@@ -317,7 +453,7 @@ class PlaybackService : Service() {
 
   fun updateLayers(next: List<Layer>) {
     layers = next
-    engine?.core?.setLayers(next)
+    core?.setLayers(next)
     publish()
   }
 
@@ -330,7 +466,7 @@ class PlaybackService : Service() {
 
   private fun applyFade() {
     val level = if (hasTimer && fadeMs > 0) (timeLeft().toFloat() / fadeMs).coerceIn(0f, 1f) else 1f
-    engine?.core?.master = gain * level
+    core?.master = gain * level
   }
 
   private fun buildSession() = MediaSession(this, "Nightfall").apply {
@@ -368,6 +504,7 @@ class PlaybackService : Service() {
         voiceTotalMs = speaking?.duration?.toLong() ?: 0,
         soundLevel = (gain * 100).toInt(),
         voiceLevel = (voiceLevel * 100).toInt(),
+        speaker = remote?.speaker?.name.orEmpty(),
       ),
     )
     val text = statusText(left)
@@ -448,8 +585,9 @@ class PlaybackService : Service() {
     Player.publish(PlayState())
     handler.removeCallbacksAndMessages(null)
     stopVoice()
-    engine?.release()
-    focus?.let { audio.abandonAudioFocusRequest(it) }
+    connection++
+    closeRemote()
+    closePhone()
     wakeLock?.takeIf { it.isHeld }?.release()
     session?.run {
       isActive = false
@@ -464,6 +602,7 @@ class PlaybackService : Service() {
     const val EXTRA_GAIN = "gain"
     const val EXTRA_MIX = "mix"
     const val EXTRA_SESSION = "session"
+    const val EXTRA_SPEAKER = "speaker"
     const val EXTRA_AUTOMATION = "automation"
   }
 }

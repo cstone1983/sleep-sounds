@@ -17,7 +17,10 @@ data class Layer(
 
 data class Mix(val id: String, val name: String, val layers: List<Layer>)
 
-/** What Start plays tonight. minutes = 0 means no timer. */
+/** A Wi-Fi speaker. control is where it takes commands, and can change if its address does. */
+data class Speaker(val id: String, val name: String, val model: String, val control: String)
+
+/** What Start plays tonight. minutes = 0 means no timer. A speaker takes priority over outputId. */
 data class Tonight(
   val mixId: String,
   val minutes: Int = 45,
@@ -26,6 +29,7 @@ data class Tonight(
   val gain: Int = 45,
   val voiceLevel: Int = 80,
   val mixUnderGuided: Boolean = true,
+  val speaker: Speaker? = null,
 )
 
 private val STARTER_MIXES = listOf(
@@ -56,6 +60,10 @@ class Store private constructor(context: Context) {
       .putInt("gain", value.gain)
       .putInt("voice", value.voiceLevel)
       .putBoolean("under", value.mixUnderGuided)
+      .putString("speaker_id", value.speaker?.id)
+      .putString("speaker_name", value.speaker?.name)
+      .putString("speaker_model", value.speaker?.model)
+      .putString("speaker_control", value.speaker?.control)
       .apply()
   }
 
@@ -88,6 +96,9 @@ class Store private constructor(context: Context) {
     gain = prefs.getInt("gain", 45),
     voiceLevel = prefs.getInt("voice", 80),
     mixUnderGuided = prefs.getBoolean("under", true),
+    speaker = prefs.getString("speaker_id", null)?.let {
+      Speaker(it, prefs.getString("speaker_name", "").orEmpty(), prefs.getString("speaker_model", "").orEmpty(), prefs.getString("speaker_control", "").orEmpty())
+    },
   )
 
   private fun readMixes(): List<Mix> =

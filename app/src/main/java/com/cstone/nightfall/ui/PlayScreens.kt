@@ -1,9 +1,6 @@
 package com.cstone.nightfall.ui
 
 import android.app.Activity
-import android.content.Context
-import android.media.AudioDeviceInfo
-import android.media.AudioManager
 import android.view.WindowManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -119,7 +116,7 @@ fun TonightScreen(
       Text(soundList(mix), Modifier.padding(top = 4.dp), style = style(15, color = Muted))
       Row(Modifier.padding(top = 18.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         Chip(minutesLabel(tonight.minutes), if (tonight.minutes == 0) "No timer" else "${tonight.fadeMinutes} min fade", Modifier.weight(1f), onTimer)
-        Chip(outputName(LocalContext.current, tonight.outputId), "Change output", Modifier.weight(1f), onOutput)
+        Chip(tonight.speaker?.name ?: outputName(LocalContext.current, tonight.outputId), "Change output", Modifier.weight(1f), onOutput)
       }
       Spacer(Modifier.height(18.dp))
       if (state.active) {
@@ -383,7 +380,7 @@ fun NowPlayingScreen(state: PlayState, onBack: () -> Unit, onDim: () -> Unit, on
   ) {
     Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
       IconAction(Icons.DOWN, "Back", onClick = onBack)
-      TextAction(outputName(context, 0), onClick = onOutput)
+      TextAction(state.speaker.ifEmpty { outputName(context, 0) }, onClick = onOutput)
     }
     Column(Modifier.fillMaxWidth().padding(top = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
       Text(state.title.ifEmpty { "Starting" }, style = style(16, FontWeight.Bold, Muted))
@@ -506,57 +503,3 @@ private fun DimButton(text: String, ink: Color, edge: Color, modifier: Modifier,
   }
 }
 
-private fun outputs(context: Context): List<AudioDeviceInfo> =
-  context.getSystemService(AudioManager::class.java)
-    .getDevices(AudioManager.GET_DEVICES_OUTPUTS)
-    .filter {
-      it.type == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP ||
-        it.type == AudioDeviceInfo.TYPE_WIRED_HEADPHONES ||
-        it.type == AudioDeviceInfo.TYPE_WIRED_HEADSET ||
-        it.type == AudioDeviceInfo.TYPE_USB_HEADSET ||
-        it.type == AudioDeviceInfo.TYPE_BLE_HEADSET
-    }
-
-fun outputName(context: Context, id: Int): String =
-  outputs(context).firstOrNull { it.id == id }?.productName?.toString() ?: "Phone speaker"
-
-@Composable
-fun OutputScreen(tonight: Tonight, onChange: (Tonight) -> Unit, onBack: () -> Unit) {
-  val context = LocalContext.current
-  val devices = remember { outputs(context) }
-  val manager = remember { context.getSystemService(AudioManager::class.java) }
-  fun pick(id: Int) {
-    onChange(tonight.copy(outputId = id))
-    Player.setOutput(if (id == 0) null else manager.getDevices(AudioManager.GET_DEVICES_OUTPUTS).firstOrNull { it.id == id })
-  }
-  Column(Modifier.fillMaxSize().padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-    TopBar("Play sound on", onBack)
-    Heading("This phone")
-    OutputRow(Icons.PHONE, "Phone speaker", "Default", tonight.outputId == 0) { pick(0) }
-    Heading("Connected")
-    if (devices.isEmpty()) {
-      Text("Connect Bluetooth or wired headphones and they'll show here.", style = style(14, color = Muted))
-    }
-    for (device in devices) {
-      OutputRow(Icons.BLUETOOTH, device.productName.toString(), "Connected", tonight.outputId == device.id) { pick(device.id) }
-    }
-    Heading("Room speakers")
-    Card(Modifier.fillMaxWidth()) {
-      Text("Sonos and other room speakers aren't connected yet.", style = style(14, color = Muted))
-    }
-  }
-}
-
-@Composable
-private fun OutputRow(icon: String, name: String, note: String, on: Boolean, onClick: () -> Unit) {
-  Card(Modifier.fillMaxWidth().heightIn(min = 64.dp), border = if (on) Amber else Line, background = if (on) Raised else Panel, onClick = onClick) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-      Glyph(icon, 24.dp)
-      Column(Modifier.weight(1f)) {
-        Text(name, style = style(16, FontWeight.Bold))
-        Text(note, style = style(13, color = Muted))
-      }
-      if (on) Glyph(Icons.CHECK, 24.dp, Amber)
-    }
-  }
-}
