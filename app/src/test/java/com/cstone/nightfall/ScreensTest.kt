@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import com.cstone.nightfall.data.Layer
 import com.cstone.nightfall.playback.PlayState
 import com.cstone.nightfall.playback.Preview
@@ -131,6 +132,19 @@ class ScreensTest {
     compose.onNodeWithText("Change the mix").performClick()
     compose.waitForIdle()
     compose.onNodeWithContentDescription("Preview Heavy rain").assertDoesNotExist()
+  }
+
+  @Test
+  fun phoneVolumeCanBeSetForEachStart() {
+    compose.setContent { NightfallApp(start = Route.Output) }
+    compose.onNodeWithText("Set phone volume at start").performScrollTo().performClick()
+    compose.waitForIdle()
+    compose.onNodeWithContentDescription("Phone volume at start").performScrollTo().assertIsDisplayed()
+    compose.onNodeWithText("40%").assertIsDisplayed()
+    compose.onRoot().captureRoboImage("$OUT/output-volume.png")
+    compose.onNodeWithText("Set phone volume at start").performClick()
+    compose.waitForIdle()
+    compose.onNodeWithContentDescription("Phone volume at start").assertDoesNotExist()
   }
 
   @Test

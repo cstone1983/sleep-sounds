@@ -78,6 +78,7 @@ class PlaybackService : Service() {
   private var voice: MediaPlayer? = null
   private var guide: Guided? = null
   private var voiceLevel = 0.8f
+  private var phoneVolume: PhoneVolume? = null
   private lateinit var attributes: AudioAttributes
 
   private val tick = object : Runnable {
@@ -124,8 +125,8 @@ class PlaybackService : Service() {
     title = mix.name
     layers = if (guided != null && !tonight.mixUnderGuided) emptyList() else mix.layers
     voiceLevel = tonight.voiceLevel / 100f
-    gain = (intent?.getIntExtra(EXTRA_GAIN, tonight.gain) ?: tonight.gain).coerceIn(1, 100) / 100f
-    val chosen = intent?.getIntExtra(EXTRA_SECONDS, tonight.minutes * 60) ?: (tonight.minutes * 60)
+    gain = (intExtra(intent, EXTRA_GAIN) ?: tonight.gain).coerceIn(1, 100) / 100f
+    val chosen = intExtra(intent, EXTRA_SECONDS)?.coerceAtLeast(0) ?: (tonight.minutes * 60)
     // Without a mix, the session ends with the voice. Otherwise the sounds carry on after it.
     val seconds = when {
       guided == null -> chosen
@@ -159,6 +160,10 @@ class PlaybackService : Service() {
     running = true
     Player.service = this
     Preview.stop()
+    // An automation's level wins over the saved one. Set before any sound, so there's no loud moment.
+    val volume = intExtra(intent, EXTRA_VOLUME)?.takeIf { it > 0 }
+      ?: tonight.phoneVolume.takeIf { tonight.setPhoneVolume }
+    if (volume != null) phoneVolume = PhoneVolume(audio).also { it.set(volume) }
     val named = intent?.getStringExtra(EXTRA_SPEAKER)
     when {
       named.equals("phone", ignoreCase = true) -> playOnPhone()
@@ -588,6 +593,7 @@ class PlaybackService : Service() {
     connection++
     closeRemote()
     closePhone()
+    phoneVolume?.restore()
     wakeLock?.takeIf { it.isHeld }?.release()
     session?.run {
       isActive = false
@@ -598,8 +604,18 @@ class PlaybackService : Service() {
   }
 
   companion object {
+    /** Home Assistant sends extras as text unless they're typed, so numbers are read either way. */
+    @Suppress("DEPRECATION")
+    fun intExtra(intent: Intent?, name: String): Int? = when (val value = intent?.extras?.get(name)) {
+      is Int -> value
+      is Long -> value.toInt()
+      is String -> value.trim().toIntOrNull()
+      else -> null
+    }
+
     const val EXTRA_SECONDS = "secs"
     const val EXTRA_GAIN = "gain"
+    const val EXTRA_VOLUME = "volume"
     const val EXTRA_MIX = "mix"
     const val EXTRA_SESSION = "session"
     const val EXTRA_SPEAKER = "speaker"

@@ -15,7 +15,7 @@ Commands are Android broadcasts sent to the app package, `com.cstone.nightfall`.
 
 | Action | What it does | Extras |
 |---|---|---|
-| `<package>.START` | Starts tonight's mix | `key`, plus optional `secs` (0 means no timer), `gain` (1 to 100) `mix` (a mix name), `session` (a guided session: `slow_countdown`, `letting_go`, `body_scan` or `deep_rest`) and `speaker` (a Wi-Fi speaker's room name, or `phone`) |
+| `<package>.START` | Starts tonight's mix | `key`, plus optional `secs` (0 means no timer), `gain` (1 to 100) `mix` (a mix name), `session` (a guided session: `slow_countdown`, `letting_go`, `body_scan` or `deep_rest`), `speaker` (a Wi-Fi speaker's room name, or `phone`) and `volume` (the phone's media volume for this start, 1 to 100) |
 | `<package>.STOP` | Stops playback | `key` |
 | `<package>.TOGGLE` | Pauses or resumes | `key` |
 | `<package>.ADD15` | Adds 15 minutes to the timer | `key` |
@@ -35,6 +35,8 @@ data:
     intent_action: <package>.START
     intent_extras: key:<your key>
 ```
+
+Add extras to the same line, separated by commas, such as `key:<your key>,secs:2700,volume:35`. Numbers can be sent as plain text.
 
 `ttl: 0` and `priority: high` make the push wake a sleeping phone at once. Without them it can wait for the phone's next check-in.
 
@@ -92,6 +94,12 @@ Each event is a JSON POST:
 | `test` | Sent by a test button |
 
 If the phone can't start at all, it may not be able to report that. Treat a missing `started` event after about 20 seconds as a failure.
+
+## Phone volume
+
+Nightfall plays at whatever media volume the phone was left on, unless **Set phone volume at start** is on (under **Change output**). Then every start, including one from an automation, sets the media volume first. A `volume` extra on the start command does the same for that one start, whether the setting is on or not.
+
+When the session ends, the volume goes back to what it was, unless someone changed it during the session. With a Wi-Fi speaker it only affects a guided session's voice, which plays on the phone.
 
 ## Playing on other speakers
 

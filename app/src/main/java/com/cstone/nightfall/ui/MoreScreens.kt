@@ -295,6 +295,7 @@ fun RoutineScreen(mix: Mix, tonight: Tonight) {
     Card(Modifier.fillMaxWidth()) {
       Fact("Plays", mix.name)
       Fact("For", if (tonight.minutes == 0) "All night" else "${minutesLabel(tonight.minutes)}, ${tonight.fadeMinutes} min fade")
+      Fact("Phone volume", if (tonight.setPhoneVolume) "Set to ${tonight.phoneVolume}%" else "Left as it is")
     }
     Heading("Ready check")
     Card(Modifier.fillMaxWidth()) {

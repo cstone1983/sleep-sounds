@@ -30,6 +30,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -43,6 +45,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.cstone.nightfall.connect.SpeakerSearch
@@ -53,6 +57,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 
 private fun outputs(context: Context): List<AudioDeviceInfo> =
   context.getSystemService(AudioManager::class.java)
@@ -208,7 +213,41 @@ fun OutputScreen(tonight: Tonight, onChange: (Tonight) -> Unit, onBack: () -> Un
       if (!searching) TextAction("Search again") { round++ }
     }
     BluetoothRows(devices)
+    VolumeRows(tonight, onChange)
   }
+}
+
+/** The phone's own media volume, set at each start so a level left loud or muted can't spoil the night. */
+@Composable
+private fun VolumeRows(tonight: Tonight, onChange: (Tonight) -> Unit) {
+  Heading("Phone volume")
+  Card(
+    Modifier.fillMaxWidth().heightIn(min = 64.dp),
+    onClick = { onChange(tonight.copy(setPhoneVolume = !tonight.setPhoneVolume)) },
+  ) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Text("Set phone volume at start", Modifier.weight(1f), style = style(15, FontWeight.SemiBold))
+      Text(if (tonight.setPhoneVolume) "On" else "Off", style = style(14, FontWeight.ExtraBold, if (tonight.setPhoneVolume) Amber else Faint))
+    }
+  }
+  if (tonight.setPhoneVolume) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Text("Volume", Modifier.weight(1f), style = style(15, FontWeight.Bold))
+      Text("${tonight.phoneVolume}%", style = style(15, FontWeight.Bold, Amber))
+    }
+    Slider(
+      value = tonight.phoneVolume.toFloat(),
+      onValueChange = { onChange(tonight.copy(phoneVolume = it.roundToInt())) },
+      valueRange = 5f..100f,
+      modifier = Modifier.heightIn(min = 44.dp).semantics { contentDescription = "Phone volume at start" },
+      colors = SliderDefaults.colors(thumbColor = Amber, activeTrackColor = Amber, inactiveTrackColor = Line),
+    )
+  }
+  Text(
+    "Every start sets the phone's media volume first, including starts from an automation. " +
+      "It goes back to what it was when the session ends, unless you change it while it plays.",
+    style = style(13, color = Muted),
+  )
 }
 
 @Composable

@@ -20,7 +20,10 @@ data class Mix(val id: String, val name: String, val layers: List<Layer>)
 /** A Wi-Fi speaker. control is where it takes commands, and can change if its address does. */
 data class Speaker(val id: String, val name: String, val model: String, val control: String)
 
-/** What Start plays tonight. minutes = 0 means no timer. A speaker takes priority over outputId. */
+/**
+ * What Start plays tonight. minutes = 0 means no timer. A speaker takes priority over outputId.
+ * When setPhoneVolume is on, each start sets the phone's media volume to phoneVolume percent.
+ */
 data class Tonight(
   val mixId: String,
   val minutes: Int = 45,
@@ -30,6 +33,8 @@ data class Tonight(
   val voiceLevel: Int = 80,
   val mixUnderGuided: Boolean = true,
   val speaker: Speaker? = null,
+  val setPhoneVolume: Boolean = false,
+  val phoneVolume: Int = 40,
 )
 
 private val STARTER_MIXES = listOf(
@@ -64,6 +69,8 @@ class Store private constructor(context: Context) {
       .putString("speaker_name", value.speaker?.name)
       .putString("speaker_model", value.speaker?.model)
       .putString("speaker_control", value.speaker?.control)
+      .putBoolean("set_phone_volume", value.setPhoneVolume)
+      .putInt("phone_volume", value.phoneVolume)
       .apply()
   }
 
@@ -99,6 +106,8 @@ class Store private constructor(context: Context) {
     speaker = prefs.getString("speaker_id", null)?.let {
       Speaker(it, prefs.getString("speaker_name", "").orEmpty(), prefs.getString("speaker_model", "").orEmpty(), prefs.getString("speaker_control", "").orEmpty())
     },
+    setPhoneVolume = prefs.getBoolean("set_phone_volume", false),
+    phoneVolume = prefs.getInt("phone_volume", 40),
   )
 
   private fun readMixes(): List<Mix> =
