@@ -99,7 +99,7 @@ If the phone can't start at all, it may not be able to report that. Treat a miss
 
 Nightfall plays at whatever media volume the phone was left on, unless **Set phone volume at start** is on (under **Change output**). Then every start, including one from an automation, sets the media volume first. A `volume` extra on the start command does the same for that one start, whether the setting is on or not.
 
-When the session ends, the volume goes back to what it was, unless someone changed it during the session. With a Wi-Fi speaker it only affects a guided session's voice, which plays on the phone.
+If someone changes the volume while a session plays and leaves it for a few seconds, that level is saved and every later start uses it. Muting isn't saved, and neither is the level Android switches to when headphones or a speaker connect. Otherwise the volume goes back to what it was when the session ends. With a Wi-Fi speaker it only affects a guided session's voice, which plays on the phone.
 
 ## Playing on other speakers
 

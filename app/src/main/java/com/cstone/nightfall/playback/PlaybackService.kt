@@ -84,6 +84,7 @@ class PlaybackService : Service() {
   private val tick = object : Runnable {
     override fun run() {
       applyFade()
+      phoneVolume?.check()?.let(::keepPhoneVolume)
       val left = timeLeft()
       if (hasTimer && !paused && left <= 0) {
         Log.i("Nightfall", "timer ended")
@@ -468,6 +469,11 @@ class PlaybackService : Service() {
 
   private fun timeLeft(counting: Boolean = !paused): Long =
     if (counting) (remainingMs - (System.currentTimeMillis() - resumedAt)).coerceAtLeast(0) else remainingMs
+
+  /** A level chosen while sound plays becomes the one every later start uses. */
+  private fun keepPhoneVolume(percent: Int) {
+    Store.get(this).run { setTonight(tonight.value.copy(phoneVolume = percent)) }
+  }
 
   private fun applyFade() {
     val level = if (hasTimer && fadeMs > 0) (timeLeft().toFloat() / fadeMs).coerceIn(0f, 1f) else 1f

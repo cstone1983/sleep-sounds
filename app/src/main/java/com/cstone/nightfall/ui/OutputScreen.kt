@@ -245,7 +245,8 @@ private fun VolumeRows(tonight: Tonight, onChange: (Tonight) -> Unit) {
   }
   Text(
     "Every start sets the phone's media volume first, including starts from an automation. " +
-      "It goes back to what it was when the session ends, unless you change it while it plays.",
+      "If you change the volume while it plays, that becomes the level for later nights. " +
+      "Otherwise it goes back to what it was when the session ends.",
     style = style(13, color = Muted),
   )
 }

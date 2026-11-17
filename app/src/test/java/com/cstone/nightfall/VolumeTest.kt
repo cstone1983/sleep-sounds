@@ -46,6 +46,59 @@ class VolumeTest {
   }
 
   @Test
+  fun aLevelChosenWhilePlayingIsKept() {
+    audio.setStreamVolume(AudioManager.STREAM_MUSIC, max, 0)
+    val volume = PhoneVolume(audio)
+    volume.set(40)
+    assertNull(volume.check(0))
+    audio.setStreamVolume(AudioManager.STREAM_MUSIC, Math.round(max * 0.6f), 0)
+    assertNull("saved before it settled", volume.check(1_000))
+    assertNull(volume.check(2_000))
+    assertEquals(60, volume.check(4_000))
+    assertNull("saved twice", volume.check(5_000))
+    volume.restore()
+    assertEquals(Math.round(max * 0.6f), now)
+  }
+
+  @Test
+  fun aLevelPassedThroughOnTheWayIsNotKept() {
+    audio.setStreamVolume(AudioManager.STREAM_MUSIC, max, 0)
+    val volume = PhoneVolume(audio)
+    volume.set(40)
+    audio.setStreamVolume(AudioManager.STREAM_MUSIC, Math.round(max * 0.6f), 0)
+    assertNull(volume.check(1_000))
+    audio.setStreamVolume(AudioManager.STREAM_MUSIC, Math.round(max * 0.2f), 0)
+    assertNull(volume.check(3_500))
+    assertNull(volume.check(5_000))
+    assertEquals(20, volume.check(6_500))
+  }
+
+  @Test
+  fun aNewDevicesVolumeIsNotKept() {
+    audio.setStreamVolume(AudioManager.STREAM_MUSIC, max, 0)
+    val volume = PhoneVolume(audio)
+    volume.set(40)
+    volume.routeChanged(10_000)
+    audio.setStreamVolume(AudioManager.STREAM_MUSIC, 2, 0)
+    assertNull(volume.check(11_000))
+    assertNull(volume.check(20_000))
+    volume.restore()
+    assertEquals("the speaker's level was replaced with the phone's", 2, now)
+  }
+
+  @Test
+  fun mutingIsNotKept() {
+    audio.setStreamVolume(AudioManager.STREAM_MUSIC, max, 0)
+    val volume = PhoneVolume(audio)
+    volume.set(40)
+    audio.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0)
+    assertNull(volume.check(1_000))
+    assertNull(volume.check(5_000))
+    volume.restore()
+    assertEquals(0, now)
+  }
+
+  @Test
   fun readsNumbersSentAsText() {
     val intent = Intent().putExtra("secs", "1800").putExtra("gain", 30).putExtra("volume", " 25 ").putExtra("mix", "rain")
     assertEquals(1800, PlaybackService.intExtra(intent, "secs"))
