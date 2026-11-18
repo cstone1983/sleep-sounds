@@ -19,7 +19,7 @@ private const val LENGTH = 0xFFFFFFF0L
 internal fun wavHeader(size: Long, rate: Int): ByteArray {
   val header = ByteBuffer.allocate(44).order(ByteOrder.LITTLE_ENDIAN)
   header.put("RIFF".toByteArray()).putInt((size - 8).toInt()).put("WAVEfmt ".toByteArray())
-  header.putInt(16).putShort(1).putShort(1).putInt(rate).putInt(rate * 2).putShort(2).putShort(16)
+  header.putInt(16).putShort(1).putShort(2).putInt(rate).putInt(rate * 4).putShort(4).putShort(16)
   header.put("data".toByteArray()).putInt((size - 44).toInt())
   return header.array()
 }
@@ -89,8 +89,9 @@ class StreamServer(private val core: MixCore, private val onDrop: () -> Unit) {
   }
 
   private fun pump(out: OutputStream) {
-    val samples = FloatArray(BLOCK)
-    val bytes = ByteBuffer.allocate(BLOCK * 2).order(ByteOrder.LITTLE_ENDIAN)
+    val samples = FloatArray(BLOCK * 2)
+    val bytes = ByteBuffer.allocate(BLOCK * 4).order(ByteOrder.LITTLE_ENDIAN)
+    val dither = Rng()
     var start = System.currentTimeMillis()
     var sentMs = 0L
     while (!closed) {
@@ -103,7 +104,11 @@ class StreamServer(private val core: MixCore, private val onDrop: () -> Unit) {
       if (ahead < -STALLED_MS) start = System.currentTimeMillis() - sentMs + LEAD_MS
       synchronized(core) { core.render(samples) }
       bytes.clear()
-      for (sample in samples) bytes.putShort((sample.coerceIn(-1f, 1f) * 32_767).toInt().toShort())
+      // A little noise before rounding keeps quiet fades smooth at 16 bits.
+      for (sample in samples) {
+        val value = sample * 32_766f + dither.unit() - dither.unit()
+        bytes.putShort(Math.round(value).coerceIn(-32_768, 32_767).toShort())
+      }
       out.write(bytes.array())
       sentMs += BLOCK * 1_000L / SAMPLE_RATE
     }

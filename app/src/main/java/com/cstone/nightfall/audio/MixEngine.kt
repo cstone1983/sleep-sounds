@@ -13,21 +13,27 @@ import kotlin.math.tanh
 private const val BLOCK = 4_800
 
 /** Everything the audio thread needs for one sound in the mix. Safe to change while playing. */
-private class Voice(val id: String, val gen: Gen) {
+private class Voice(val id: String, val source: Source) {
   @Volatile var target = 0f
   @Volatile var drift = false
   @Volatile var soften = false
   @Volatile var leaving = false
   var level = 0f
   var phase = Math.random().toFloat()
-  val softener = LowPass(0.09f)
+  val softenLeft = Biquad().lowPass(1_400f, 0.6f)
+  val softenRight = Biquad().lowPass(1_400f, 0.6f)
 }
 
-/** Renders the mix into one block. Separate from the AudioTrack so tests can run it without a device. */
+/**
+ * Renders the mix in stereo. Separate from the AudioTrack so tests can run it without a device.
+ * Blocks are interleaved: left, right, left, right.
+ */
 class MixCore {
   private val voices = CopyOnWriteArrayList<Voice>()
   @Volatile var master = 1f
   private var masterNow = 0f
+  private var left = FloatArray(0)
+  private var right = FloatArray(0)
 
   fun setLayers(layers: List<Layer>) {
     val wanted = layers.associateBy { it.soundId }
@@ -50,25 +56,38 @@ class MixCore {
   }
 
   fun render(out: FloatArray) {
+    val frames = out.size / 2
+    if (left.size < frames) {
+      left = FloatArray(frames)
+      right = FloatArray(frames)
+    }
     out.fill(0f)
     for (voice in voices) {
       val goal = if (voice.leaving) 0f else voice.target
       // Drift swells a sound gently over about 40 seconds.
-      voice.phase += out.size / (SAMPLE_RATE * 40f)
+      voice.phase += frames / (SAMPLE_RATE * 40f)
       if (voice.phase >= 1f) voice.phase -= 1f
       val swing = if (voice.drift) 0.65f + 0.35f * sin(voice.phase * 2.0 * PI).toFloat() else 1f
       val soften = voice.soften
-      for (i in out.indices) {
+      voice.source.render(left, right, frames)
+      for (i in 0 until frames) {
         voice.level += (goal - voice.level) * 0.0004f
-        var sample = voice.gen.next()
-        if (soften) sample = voice.softener.step(sample) * 1.5f
-        out[i] += sample * voice.level * swing
+        var a = left[i]
+        var b = right[i]
+        if (soften) {
+          a = voice.softenLeft.step(a) * 1.5f
+          b = voice.softenRight.step(b) * 1.5f
+        }
+        val gain = voice.level * swing
+        out[i * 2] += a * gain
+        out[i * 2 + 1] += b * gain
       }
       if (voice.leaving && voice.level < 0.001f) voices.remove(voice)
     }
-    for (i in out.indices) {
+    for (i in 0 until frames) {
       masterNow += (master - masterNow) * 0.0002f
-      out[i] = tanh(out[i] * masterNow)
+      out[i * 2] = tanh(out[i * 2] * masterNow)
+      out[i * 2 + 1] = tanh(out[i * 2 + 1] * masterNow)
     }
   }
 }
@@ -89,13 +108,13 @@ class MixEngine(attributes: AudioAttributes) {
     val format = AudioFormat.Builder()
       .setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
       .setSampleRate(SAMPLE_RATE)
-      .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+      .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
       .build()
-    val minimum = AudioTrack.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_FLOAT)
+    val minimum = AudioTrack.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_FLOAT)
     track = AudioTrack.Builder()
       .setAudioAttributes(attributes)
       .setAudioFormat(format)
-      .setBufferSizeInBytes(maxOf(minimum * 4, BLOCK * 4 * 2))
+      .setBufferSizeInBytes(maxOf(minimum * 4, BLOCK * 2 * 4 * 2))
       .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_POWER_SAVING)
       .setTransferMode(AudioTrack.MODE_STREAM)
       .build()
@@ -105,7 +124,7 @@ class MixEngine(attributes: AudioAttributes) {
     running = true
     track.play()
     thread = Thread({
-      val buffer = FloatArray(BLOCK)
+      val buffer = FloatArray(BLOCK * 2)
       while (running) {
         if (paused) {
           Thread.sleep(50)

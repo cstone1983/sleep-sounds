@@ -80,10 +80,10 @@ class SpeakerTest {
   }
 
   @Test
-  fun wavHeaderDescribesMono16Bit() {
+  fun wavHeaderDescribesStereo16Bit() {
     val header = ByteBuffer.wrap(wavHeader(0xFFFFFFF0L, SAMPLE_RATE)).order(ByteOrder.LITTLE_ENDIAN)
     assertEquals(44, header.capacity())
-    assertEquals(1, header.getShort(22).toInt())
+    assertEquals(2, header.getShort(22).toInt())
     assertEquals(SAMPLE_RATE, header.getInt(24))
     assertEquals(16, header.getShort(34).toInt())
     assertEquals(0xFFFFFFF0L - 44, header.getInt(40).toLong() and 0xFFFFFFFFL)
