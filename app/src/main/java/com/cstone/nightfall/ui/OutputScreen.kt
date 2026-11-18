@@ -227,20 +227,20 @@ private fun VolumeRows(tonight: Tonight, onChange: (Tonight) -> Unit) {
   ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
       Text("Set phone volume at start", Modifier.weight(1f), style = style(15, FontWeight.SemiBold))
-      Text(if (tonight.setPhoneVolume) "On" else "Off", style = style(14, FontWeight.ExtraBold, if (tonight.setPhoneVolume) Amber else Faint))
+      Text(if (tonight.setPhoneVolume) "On" else "Off", style = style(14, FontWeight.ExtraBold, if (tonight.setPhoneVolume) Glow else Faint))
     }
   }
   if (tonight.setPhoneVolume) {
     Row(verticalAlignment = Alignment.CenterVertically) {
       Text("Volume", Modifier.weight(1f), style = style(15, FontWeight.Bold))
-      Text("${tonight.phoneVolume}%", style = style(15, FontWeight.Bold, Amber))
+      Text("${tonight.phoneVolume}%", style = style(15, FontWeight.Bold, Glow))
     }
     Slider(
       value = tonight.phoneVolume.toFloat(),
       onValueChange = { onChange(tonight.copy(phoneVolume = it.roundToInt())) },
       valueRange = 5f..100f,
       modifier = Modifier.heightIn(min = 44.dp).semantics { contentDescription = "Phone volume at start" },
-      colors = SliderDefaults.colors(thumbColor = Amber, activeTrackColor = Amber, inactiveTrackColor = Line),
+      colors = SliderDefaults.colors(thumbColor = Glow, activeTrackColor = Glow, inactiveTrackColor = Line),
     )
   }
   Text(
@@ -253,14 +253,14 @@ private fun VolumeRows(tonight: Tonight, onChange: (Tonight) -> Unit) {
 
 @Composable
 private fun OutputRow(icon: String, name: String, note: String, on: Boolean, onClick: () -> Unit) {
-  Card(Modifier.fillMaxWidth().heightIn(min = 64.dp), border = if (on) Amber else Line, background = if (on) Raised else Panel, onClick = onClick) {
+  Card(Modifier.fillMaxWidth().heightIn(min = 64.dp), border = if (on) Glow else Line, background = if (on) Raised else Panel, onClick = onClick) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
       Glyph(icon, 24.dp)
       Column(Modifier.weight(1f)) {
         Text(name, style = style(16, FontWeight.Bold))
         Text(note, style = style(13, color = Muted))
       }
-      if (on) Glyph(Icons.CHECK, 24.dp, Amber)
+      if (on) Glyph(Icons.CHECK, 24.dp, Glow)
     }
   }
 }

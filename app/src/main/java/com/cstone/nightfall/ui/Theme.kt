@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,6 +28,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
@@ -48,16 +52,56 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cstone.nightfall.R
 
-val Ground = Color(0xFF12100E)
-val Panel = Color(0xFF1C1916)
-val Raised = Color(0xFF26211C)
-val Line = Color(0xFF332C25)
-val LineStrong = Color(0xFF6B5B48)
-val Ink = Color(0xFFF2E9DC)
-val Muted = Color(0xFFC9BBA6)
-val Faint = Color(0xFFA89A86)
-val Amber = Color(0xFFE8A860)
-val OnAmber = Color(0xFF2A1C0C)
+// Night sky: deep indigo, soft glass panels, and a warm moon-glow for anything you can press.
+val Ground = Color(0xFF0A0C1E)
+val Panel = Color(0xD9191C3A)
+val Raised = Color(0xF0272B58)
+val Line = Color(0x24FFFFFF)
+val LineStrong = Color(0x66C9CCFF)
+val Ink = Color(0xFFF1F2FF)
+val Muted = Color(0xFFBBBFE0)
+val Faint = Color(0xFF989DC6)
+val Glow = Color(0xFFFFCF96)
+val OnGlow = Color(0xFF241538)
+val Violet = Color(0xFFA99BFF)
+val Rose = Color(0xFFF59AC0)
+
+/** The sweep used on the main buttons: moonrise into aurora. */
+val Aurora = Brush.linearGradient(listOf(Color(0xFFFFCF96), Rose, Violet))
+
+private val SOUND_COLOURS = mapOf(
+  "heavy_rain" to 0xFF6FA8FF, "light_rain" to 0xFF9CC7FF, "thunder" to 0xFFB79CFF, "roof" to 0xFF7F9BE8,
+  "tent" to 0xFF8FD3C0, "window" to 0xFFA9B8FF,
+  "ocean" to 0xFF4FC7E8, "creek" to 0xFF5FE0C4, "stream" to 0xFF7BE8A8, "waterfall" to 0xFF8AD8FF,
+  "drip" to 0xFF7FB8E8, "cave" to 0xFF9AA6D8,
+  "wind" to 0xFFB8E0E8, "trees" to 0xFF9BE08A, "fire" to 0xFFFFA05C, "crickets" to 0xFFD6E86A,
+  "frogs" to 0xFF7ED67A, "birds" to 0xFFFFD27A, "owls" to 0xFFE0B48A,
+  "white" to 0xFFE8EAFF, "pink" to 0xFFFFA8D0, "brown" to 0xFFD9A47A, "fan" to 0xFFA8C8E8,
+  "train" to 0xFFC8B0E8, "hum" to 0xFF9C8CFF,
+  "bowls" to 0xFFFFC46A, "chimes" to 0xFFFFE08A, "drone" to 0xFFC49CFF, "heartbeat" to 0xFFFF8C9C,
+)
+
+/** Every sound has its own colour, used wherever it appears. */
+fun soundColor(id: String) = Color(SOUND_COLOURS[id] ?: 0xFFA99BFF)
+
+private class Star(val x: Float, val y: Float, val size: Float, val alpha: Float)
+
+private val STARS = java.util.Random(11).let { random ->
+  List(70) { Star(random.nextFloat(), random.nextFloat().let { it * it }, 0.35f + random.nextFloat() * 0.75f, 0.12f + random.nextFloat() * 0.45f) }
+}
+
+/** The backdrop behind every screen: dusk at the top, stars thinning towards the horizon, a hint of moonlight. */
+fun Modifier.nightSky() = drawBehind {
+  drawRect(Brush.verticalGradient(listOf(Color(0xFF1B1747), Color(0xFF10122E), Color(0xFF080A1A))))
+  drawCircle(
+    Brush.radialGradient(listOf(Color(0x40A99BFF), Color.Transparent), Offset(size.width * 0.85f, size.height * 0.06f), size.width * 0.7f),
+    size.width * 0.7f,
+    Offset(size.width * 0.85f, size.height * 0.06f),
+  )
+  for (star in STARS) {
+    drawCircle(Color.White.copy(alpha = star.alpha), star.size * density, Offset(star.x * size.width, star.y * size.height * 0.75f))
+  }
+}
 
 @OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
 private fun manrope(weight: FontWeight) = Font(
@@ -86,8 +130,9 @@ fun style(size: Int, weight: FontWeight = FontWeight.Normal, color: Color = Ink,
 fun NightfallTheme(content: @Composable () -> Unit) {
   MaterialTheme(
     colorScheme = darkColorScheme(
-      primary = Amber,
-      onPrimary = OnAmber,
+      primary = Glow,
+      onPrimary = OnGlow,
+      secondary = Violet,
       background = Ground,
       surface = Panel,
       onSurface = Ink,
@@ -136,7 +181,7 @@ fun Glyph(path: String, size: Dp = 24.dp, color: Color = Ink, filled: Boolean = 
   }
 }
 
-private val CardShape = RoundedCornerShape(18.dp)
+private val CardShape = RoundedCornerShape(24.dp)
 
 @Composable
 fun Card(
@@ -161,11 +206,11 @@ fun PrimaryButton(text: String, modifier: Modifier = Modifier, height: Dp = 72.d
       .fillMaxWidth()
       .height(height)
       .clip(RoundedCornerShape(height / 2))
-      .background(Amber)
+      .background(Aurora)
       .clickable(role = Role.Button, onClick = onClick),
     contentAlignment = Alignment.Center,
   ) {
-    Text(text, style = style(20, FontWeight.ExtraBold, OnAmber))
+    Text(text, style = style(20, FontWeight.ExtraBold, OnGlow))
   }
 }
 
@@ -176,16 +221,16 @@ fun OutlineButton(text: String, modifier: Modifier = Modifier, onClick: () -> Un
       .fillMaxWidth()
       .height(64.dp)
       .clip(RoundedCornerShape(32.dp))
-      .border(1.dp, Amber, RoundedCornerShape(32.dp))
+      .border(1.dp, Glow, RoundedCornerShape(32.dp))
       .clickable(role = Role.Button, onClick = onClick),
     contentAlignment = Alignment.Center,
   ) {
-    Text(text, style = style(16, FontWeight.ExtraBold, Amber), textAlign = TextAlign.Center)
+    Text(text, style = style(16, FontWeight.ExtraBold, Glow), textAlign = TextAlign.Center)
   }
 }
 
 @Composable
-fun TextAction(text: String, color: Color = Amber, onClick: () -> Unit) {
+fun TextAction(text: String, color: Color = Glow, onClick: () -> Unit) {
   Box(
     Modifier
       .sizeIn(minWidth = 44.dp, minHeight = 44.dp)
@@ -233,24 +278,51 @@ enum class Tab(val label: String, val icon: String) {
 
 @Composable
 fun BottomTabs(current: Tab, onPick: (Tab) -> Unit) {
-  Column(Modifier.fillMaxWidth().navigationBarsPadding()) {
-    Box(Modifier.fillMaxWidth().height(1.dp).background(Line))
-    Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
-      for (tab in Tab.entries) {
-        val color = if (tab == current) Amber else Muted
-        Column(
-          Modifier
-            .weight(1f)
-            .heightIn(min = 68.dp)
-            .clickable(role = Role.Tab) { onPick(tab) },
-          horizontalAlignment = Alignment.CenterHorizontally,
-          verticalArrangement = Arrangement.Center,
-        ) {
-          Glyph(tab.icon, 24.dp, color)
-          Text(tab.label, Modifier.padding(top = 4.dp), style = style(12, FontWeight.SemiBold, color))
-        }
+  Row(
+    Modifier
+      .fillMaxWidth()
+      .navigationBarsPadding()
+      .padding(horizontal = 12.dp, vertical = 10.dp)
+      .clip(RoundedCornerShape(32.dp))
+      .background(Panel)
+      .border(1.dp, Line, RoundedCornerShape(32.dp))
+      .padding(6.dp),
+    horizontalArrangement = Arrangement.spacedBy(2.dp),
+  ) {
+    for (tab in Tab.entries) {
+      val on = tab == current
+      val color = if (on) Glow else Muted
+      Column(
+        Modifier
+          .weight(1f)
+          .heightIn(min = 58.dp)
+          .clip(RoundedCornerShape(26.dp))
+          .background(if (on) Raised else Color.Transparent)
+          .clickable(role = Role.Tab) { onPick(tab) },
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+      ) {
+        Glyph(tab.icon, 22.dp, color)
+        Text(tab.label, Modifier.padding(top = 3.dp), style = style(11, if (on) FontWeight.ExtraBold else FontWeight.SemiBold, color), maxLines = 1)
       }
     }
+  }
+}
+
+/** A soft light behind something round. Three rings fading out, which reads as a glow without any blur. */
+fun Modifier.halo(color: Color, strength: Float = 1f) = drawBehind {
+  val radius = size.minDimension / 2
+  drawCircle(color.copy(alpha = 0.10f * strength), radius * 1.38f)
+  drawCircle(color.copy(alpha = 0.14f * strength), radius * 1.22f)
+  drawCircle(color.copy(alpha = 0.20f * strength), radius * 1.09f)
+}
+
+/** A small coloured dot with a sound's icon, used wherever a mix is summarised. */
+@Composable
+fun SoundDot(soundId: String, icon: String, size: Dp = 34.dp) {
+  val color = soundColor(soundId)
+  Box(Modifier.size(size).clip(CircleShape).background(color.copy(alpha = 0.18f)).border(1.dp, color.copy(alpha = 0.5f), CircleShape), contentAlignment = Alignment.Center) {
+    Glyph(icon, size * 0.56f, color)
   }
 }
 

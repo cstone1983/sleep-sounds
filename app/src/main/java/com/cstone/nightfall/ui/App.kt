@@ -61,7 +61,7 @@ fun NightfallApp(start: Route = Route.Main(Tab.TONIGHT), previewState: PlayState
   BackHandler(enabled = stack.size > 1) { back() }
 
   NightfallTheme {
-    Box(Modifier.fillMaxSize().background(Ground), contentAlignment = Alignment.TopCenter) {
+    Box(Modifier.fillMaxSize().background(Ground).nightSky(), contentAlignment = Alignment.TopCenter) {
       Column(Modifier.fillMaxSize().widthIn(max = 600.dp).statusBarsPadding()) {
         when (route) {
           is Route.Main -> {

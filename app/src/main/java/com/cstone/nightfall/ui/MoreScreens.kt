@@ -61,6 +61,7 @@ import com.cstone.nightfall.connect.Reporter
 import com.cstone.nightfall.connect.Target
 import com.cstone.nightfall.data.GUIDED
 import com.cstone.nightfall.data.Guided
+import com.cstone.nightfall.audio.soundById
 import com.cstone.nightfall.data.Mix
 import com.cstone.nightfall.data.Tonight
 import com.cstone.nightfall.playback.PlayState
@@ -88,11 +89,14 @@ fun MixesScreen(
     Text("Tap a mix to make it tonight's. Your routine plays whichever one is set.", style = style(14, color = Muted))
     for (mix in mixes) {
       val on = mix.id == tonightId
-      Card(Modifier.fillMaxWidth().heightIn(min = 84.dp), border = if (on) Amber else Line, background = if (on) Raised else Panel, onClick = { onPick(mix) }) {
+      Card(Modifier.fillMaxWidth().heightIn(min = 84.dp), border = if (on) Glow else Line, background = if (on) Raised else Panel, onClick = { onPick(mix) }) {
         Row(verticalAlignment = Alignment.CenterVertically) {
           Column(Modifier.weight(1f)) {
             Text(mix.name, style = style(17, FontWeight.Bold))
-            if (on) Text("Tonight", style = style(13, FontWeight.ExtraBold, Amber))
+            if (on) Text("Tonight", style = style(13, FontWeight.ExtraBold, Glow))
+            Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+              for (layer in mix.layers.take(7)) soundById(layer.soundId)?.let { SoundDot(it.id, it.icon, 26.dp) }
+            }
           }
           TextAction("Edit") { onEdit(mix) }
           if (mixes.size > 1) IconAction(Icons.TRASH, "Delete ${mix.name}", Faint) { onDelete(mix) }
@@ -123,7 +127,7 @@ fun MeditateScreen(tonight: Tonight, onBreathe: () -> Unit, onGuided: (Guided) -
             Text("${session.minutes} min · ${session.note}", style = style(13, color = Muted))
           }
           Box(Modifier.size(44.dp).background(Raised, CircleShape), contentAlignment = Alignment.Center) {
-            Glyph(Icons.PLAY, 20.dp, Amber, filled = true)
+            Glyph(Icons.PLAY, 20.dp, Glow, filled = true)
           }
         }
       }
@@ -134,7 +138,7 @@ fun MeditateScreen(tonight: Tonight, onBreathe: () -> Unit, onGuided: (Guided) -
     ) {
       Row(verticalAlignment = Alignment.CenterVertically) {
         Text("Keep tonight's mix playing underneath", Modifier.weight(1f), style = style(15, FontWeight.SemiBold))
-        Text(if (tonight.mixUnderGuided) "On" else "Off", style = style(14, FontWeight.ExtraBold, if (tonight.mixUnderGuided) Amber else Faint))
+        Text(if (tonight.mixUnderGuided) "On" else "Off", style = style(14, FontWeight.ExtraBold, if (tonight.mixUnderGuided) Glow else Faint))
       }
     }
     Text("Stored on this phone. Sessions play with no internet and no API use.", style = style(13, color = Muted))
@@ -176,7 +180,7 @@ fun GuidedPlayerScreen(state: PlayState, tonight: Tonight, onBack: () -> Unit) {
           Modifier
             .fillMaxWidth(((state.voiceTotalMs - state.voiceLeftMs).toFloat() / state.voiceTotalMs).coerceIn(0f, 1f))
             .fillMaxHeight()
-            .background(Amber, RoundedCornerShape(4.dp)),
+            .background(Glow, RoundedCornerShape(4.dp)),
         )
       }
     }
@@ -184,12 +188,13 @@ fun GuidedPlayerScreen(state: PlayState, tonight: Tonight, onBack: () -> Unit) {
       Box(
         Modifier
           .size(112.dp)
-          .background(Amber, CircleShape)
+          .halo(Violet)
+          .background(Aurora, CircleShape)
           .semantics { contentDescription = if (state.paused) "Play" else "Pause" }
           .clickable(role = Role.Button) { Player.togglePause() },
         contentAlignment = Alignment.Center,
       ) {
-        Glyph(if (state.paused) Icons.PLAY else Icons.PAUSE, 44.dp, OnAmber, filled = true)
+        Glyph(if (state.paused) Icons.PLAY else Icons.PAUSE, 44.dp, OnGlow, filled = true)
       }
     }
     Level("Voice", if (state.active) state.voiceLevel else tonight.voiceLevel, Player::setVoiceLevel)
@@ -215,7 +220,7 @@ private fun Level(label: String, value: Int, onChange: (Int) -> Unit) {
       onValueChangeFinished = { dragging = null },
       valueRange = 0f..100f,
       modifier = Modifier.height(44.dp).semantics { contentDescription = "$label level" },
-      colors = SliderDefaults.colors(thumbColor = Amber, activeTrackColor = Amber, inactiveTrackColor = Line),
+      colors = SliderDefaults.colors(thumbColor = Glow, activeTrackColor = Glow, inactiveTrackColor = Line),
     )
   }
 }
@@ -247,10 +252,10 @@ fun BreatheScreen(onBack: () -> Unit) {
     Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
       Box(Modifier.size(290.dp).border(1.dp, Line, CircleShape), contentAlignment = Alignment.Center) {
         Box(
-          Modifier.size(size).background(androidx.compose.ui.graphics.Color(0xFF3A2A18), CircleShape).border(2.dp, Amber, CircleShape),
+          Modifier.size(size).halo(Violet, 0.8f).background(Aurora, CircleShape),
           contentAlignment = Alignment.Center,
         ) {
-          Text(if (running) phase.word else "Ready", style = style(22, FontWeight.ExtraBold))
+          Text(if (running) phase.word else "Ready", style = style(22, FontWeight.ExtraBold, OnGlow))
         }
       }
       Text("In for 4, out for 6", Modifier.padding(top = 24.dp), style = style(16, color = Muted))
@@ -321,7 +326,7 @@ private fun Fact(name: String, value: String) {
 @Composable
 private fun Check(text: String, ok: Boolean) {
   Row(Modifier.heightIn(min = 36.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-    Glyph(if (ok) Icons.CHECK else Icons.CROSS, 20.dp, if (ok) Amber else Faint)
+    Glyph(if (ok) Icons.CHECK else Icons.CROSS, 20.dp, if (ok) Glow else Faint)
     Text(text, style = style(14, FontWeight.SemiBold, if (ok) Ink else Muted))
   }
 }
@@ -370,7 +375,7 @@ fun SettingsScreen() {
     ) {
       Row(verticalAlignment = Alignment.CenterVertically) {
         Text("Allow remote control", Modifier.weight(1f), style = style(15, FontWeight.SemiBold))
-        Text(if (remote) "On" else "Off", style = style(14, FontWeight.ExtraBold, if (remote) Amber else Faint))
+        Text(if (remote) "On" else "Off", style = style(14, FontWeight.ExtraBold, if (remote) Glow else Faint))
       }
     }
     Text("When off, Home Assistant and n8n can't start or control Nightfall.", style = style(13, color = Muted))
@@ -435,7 +440,7 @@ fun SettingsScreen() {
 private fun SectionHeading(text: String, helpLabel: String, onHelp: () -> Unit) {
   Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
     Text(text, Modifier.weight(1f), style = style(18, FontWeight.ExtraBold))
-    IconAction(Icons.INFO, helpLabel, Amber, onHelp)
+    IconAction(Icons.INFO, helpLabel, Glow, onHelp)
   }
 }
 
@@ -447,7 +452,7 @@ private fun HelpHeading(text: String) {
 @Composable
 private fun Step(number: Int, text: String) {
   Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-    Text("$number", style = style(14, FontWeight.ExtraBold, Amber, line = 21))
+    Text("$number", style = style(14, FontWeight.ExtraBold, Glow, line = 21))
     Text(text, style = style(14, color = Muted, line = 21))
   }
 }
@@ -479,6 +484,6 @@ private fun Field(label: String, value: String, hint: String = "", secret: Boole
     textStyle = style(15),
     visualTransformation = if (secret) PasswordVisualTransformation() else VisualTransformation.None,
     modifier = Modifier.fillMaxWidth(),
-    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Amber, unfocusedBorderColor = Line, cursorColor = Amber),
+    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Glow, unfocusedBorderColor = Line, cursorColor = Glow),
   )
 }

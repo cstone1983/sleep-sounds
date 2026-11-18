@@ -9,6 +9,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
+import androidx.compose.ui.semantics.SemanticsProperties
 import com.cstone.nightfall.data.Layer
 import com.cstone.nightfall.playback.PlayState
 import com.cstone.nightfall.playback.Preview
@@ -18,6 +21,7 @@ import com.cstone.nightfall.ui.Tab
 import com.github.takahirom.roborazzi.captureRoboImage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -81,6 +85,20 @@ class ScreensTest {
     compose.onNodeWithText("Save").performClick()
     compose.waitForIdle()
     compose.onNodeWithText("Change the mix").assertIsDisplayed()
+  }
+
+  @Test
+  fun slidingAcrossALitOrbChangesItsLevel() {
+    compose.setContent { NightfallApp() }
+    compose.onNodeWithText("Change the mix").performClick()
+    compose.waitForIdle()
+    fun level() = compose.onNodeWithContentDescription("Heavy rain volume")
+      .fetchSemanticsNode().config[SemanticsProperties.ProgressBarRangeInfo].current
+    val before = level()
+    compose.onAllNodesWithText("Heavy rain")[1].performTouchInput { swipeLeft() }
+    compose.waitForIdle()
+    assertTrue("level stayed at $before", level() < before - 5)
+    compose.onNodeWithText("In this mix · 3").assertIsDisplayed()
   }
 
   @Test
