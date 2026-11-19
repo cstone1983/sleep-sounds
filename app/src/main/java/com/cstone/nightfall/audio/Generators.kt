@@ -45,7 +45,8 @@ class Noise(private val colour: Colour, private val gain: Float) : Stereo() {
 }
 
 /**
- * Rain is a hiss of countless small drops plus the nearer ones you can pick out.
+ * Rain is the patter of countless small drops plus the nearer ones you can pick out.
+ * [density] is how many of the small ones land each second: fewer sounds sparser and more "pattery".
  * The surface it lands on decides the rest: [bedLow] to [bedHigh] is the band of the hiss,
  * and the drops are noise bursts ([dropDull]) with an optional ring ([toneLow] to [toneHigh]).
  */
@@ -60,8 +61,20 @@ class Rain(
   private val dropDull: Float,
   private val toneLow: Float = 0f,
   private val toneHigh: Float = 0f,
+  density: Float = 3_000f,
 ) : Stereo() {
   private val rng = Rng()
+  // The hiss is thousands of separate tiny impacts a second, not smooth noise: smooth noise is static.
+  private val chance = density / SAMPLE_RATE
+  private val grain = kotlin.math.sqrt(0.95f / chance)
+  private val wash = Array(2) { Pink(rng) }
+
+  private fun impacts(side: Int): Float {
+    val far = wash[side].next() * 0.7f
+    if (rng.unit() >= chance) return far
+    val size = rng.unit()
+    return far + rng.bipolar() * (0.45f + size * size * size) * grain
+  }
   private val lowCut = Array(2) { Biquad().highPass(bedLow) }
   private val highCut = Array(2) { Biquad().lowPass(bedHigh) }
   private val rumble = Array(2) { Brown(rng) }
@@ -82,8 +95,8 @@ class Rain(
     drops.step()
     val level = bed * (0.75f + swell.next() * 0.5f)
     val tilt = (lean.next() - 0.5f) * 0.25f
-    val left = highCut[0].step(lowCut[0].step(rng.bipolar())) + rumbleCut[0].step(rumble[0].next()) * roar
-    val right = highCut[1].step(lowCut[1].step(rng.bipolar())) + rumbleCut[1].step(rumble[1].next()) * roar
+    val left = highCut[0].step(lowCut[0].step(impacts(0))) + rumbleCut[0].step(rumble[0].next()) * roar
+    val right = highCut[1].step(lowCut[1].step(impacts(1))) + rumbleCut[1].step(rumble[1].next()) * roar
     l = left * level * (1f - tilt) + drops.left
     r = right * level * (1f + tilt) + drops.right
   }

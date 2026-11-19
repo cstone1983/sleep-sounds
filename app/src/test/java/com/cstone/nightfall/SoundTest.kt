@@ -53,11 +53,21 @@ class SoundTest {
         for (i in start until start + SAMPLE_RATE) sum += left[i] * left[i] + right[i] * right[i]
         loudest = maxOf(loudest, sqrt(sum / (SAMPLE_RATE * 2)).toFloat())
       }
-      report.append("%-11s rms %.3f loudest %.3f peak %.2f alike %.2f dc %.4f\n".format(sound.id, level, loudest, peak, alike, mean))
+      // How spiky the sound is. Smooth noise (static) scores 3, and anything made of separate impacts scores higher.
+      var fourth = 0.0
+      var square = 0.0
+      for (value in left) {
+        square += value * value
+        fourth += value.toDouble() * value * value * value
+      }
+      val spiky = fourth / frames / ((square / frames) * (square / frames))
+      report.append("%-11s rms %.3f loudest %.3f peak %.2f alike %.2f dc %.4f spiky %.1f\n".format(sound.id, level, loudest, peak, alike, mean, spiky))
+      // Rain is made of impacts, so it peaks higher for its loudness. The mixer rounds those off.
+      if (peak >= (if (spiky > 5) 1.8f else 1.3f)) problems += "${sound.id} peaks at $peak"
+      if ((sound.id == "heavy_rain" || sound.id == "light_rain") && spiky < 4.5) problems += "${sound.id} is as smooth as static: $spiky"
       if (level <= 0.004f) problems += "${sound.id} is silent, rms=$level"
       if (loudest <= 0.05f) problems += "${sound.id} is too quiet at its loudest: $loudest"
       if (loudest >= 0.3f) problems += "${sound.id} is too loud at its loudest: $loudest"
-      if (peak >= 1.3f) problems += "${sound.id} peaks at $peak"
       // A heartbeat belongs in the middle.
       if (alike >= 0.97 && sound.id != "heartbeat") problems += "${sound.id} is the same in both ears: $alike"
       if (abs(mean) >= 0.01) problems += "${sound.id} sits off centre: $mean"

@@ -8,12 +8,12 @@ private const val ICON_RAIN = "M7 15a4 4 0 0 1 .5-8A5 5 0 0 1 17 8a3.5 3.5 0 0 1
 private const val ICON_DROP = "M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"
 
 val SOUNDS = listOf(
-  Sound("heavy_rain", "Heavy rain", Category.RAIN, ICON_RAIN) { Rain(0.34f, 500f, 9_000f, 0.5f, 90f, 0.3f, 0.012f, 0.3f) * 1.1f },
-  Sound("light_rain", "Light rain", Category.RAIN, "M7 15a4 4 0 0 1 .5-8A5 5 0 0 1 17 8a3.5 3.5 0 0 1 0 7H7ZM12 18v2") { Rain(0.14f, 1_400f, 10_000f, 0.05f, 26f, 0.22f, 0.008f, 0.15f, 2_500f, 6_000f) * 2.0f },
+  Sound("heavy_rain", "Heavy rain", Category.RAIN, ICON_RAIN) { Rain(0.46f, 400f, 6_500f, 0.5f, 90f, 0.2f, 0.012f, 0.3f, density = 5_000f) * 1.1f },
+  Sound("light_rain", "Light rain", Category.RAIN, "M7 15a4 4 0 0 1 .5-8A5 5 0 0 1 17 8a3.5 3.5 0 0 1 0 7H7ZM12 18v2") { Rain(0.2f, 1_100f, 8_000f, 0.05f, 30f, 0.09f, 0.008f, 0.25f, 2_500f, 5_000f, density = 2_000f) * 2.0f },
   Sound("thunder", "Thunder", Category.RAIN, "M13 3 6 14h5l-1 7 7-11h-5l1-7Z") { Thunder() * 0.4f },
-  Sound("roof", "Rain on roof", Category.RAIN, "M3 13 12 6l9 7M6 11v8h12v-8") { Rain(0.9f, 120f, 750f, 0.6f, 40f, 0.45f, 0.03f, 0.93f, 170f, 420f) },
-  Sound("tent", "Rain on tent", Category.RAIN, "M12 4 3 20h18L12 4ZM12 4v16M9 20l3-6 3 6") { Rain(0.22f, 300f, 3_200f, 0.1f, 120f, 0.5f, 0.012f, 0.72f, 300f, 700f) * 2.0f },
-  Sound("window", "Rain on window", Category.RAIN, "M5 3h14v18H5V3ZM12 3v18M5 12h14") { Rain(0.5f, 150f, 1_100f, 0.3f, 28f, 0.25f, 0.005f, 0.2f, 2_200f, 4_200f) * 1.6f },
+  Sound("roof", "Rain on roof", Category.RAIN, "M3 13 12 6l9 7M6 11v8h12v-8") { Rain(0.9f, 120f, 750f, 0.6f, 40f, 0.45f, 0.03f, 0.93f, 170f, 420f, density = 2_500f) },
+  Sound("tent", "Rain on tent", Category.RAIN, "M12 4 3 20h18L12 4ZM12 4v16M9 20l3-6 3 6") { Rain(0.22f, 300f, 3_200f, 0.1f, 120f, 0.5f, 0.012f, 0.72f, 300f, 700f, density = 2_200f) * 2.0f },
+  Sound("window", "Rain on window", Category.RAIN, "M5 3h14v18H5V3ZM12 3v18M5 12h14") { Rain(0.5f, 150f, 1_100f, 0.3f, 28f, 0.25f, 0.005f, 0.2f, 2_200f, 4_200f, density = 1_400f) * 1.6f },
   Sound("ocean", "Ocean", Category.WATER, "M3 9c3-3 6-3 9 0s6 3 9 0M3 15c3-3 6-3 9 0s6 3 9 0") { Ocean() },
   Sound("creek", "Creek", Category.WATER, "M3 7c3-2 6-2 9 0s6 2 9 0M3 12c3-2 6-2 9 0s6 2 9 0M3 17c3-2 6-2 9 0s6 2 9 0") { Water(0.5f, 350f, 5_000f, 0.25f, 45f, 380f, 2_200f, 0.11f) * 2.0f },
   Sound("stream", "Babbling brook", Category.WATER, "M3 8c2-2 4-2 6 0s4 2 6 0 4-2 6 0M5 14c2-2 4-2 6 0s4 2 6 0M9 19c1-1 2-1 3 0s2 1 3 0") { Water(0.28f, 900f, 7_000f, 0.05f, 95f, 700f, 3_600f, 0.09f) * 3.5f },
