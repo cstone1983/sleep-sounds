@@ -5,6 +5,7 @@ import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import com.cstone.nightfall.audio.MixEngine
+import com.cstone.nightfall.audio.Recordings
 import com.cstone.nightfall.data.Layer
 import com.cstone.nightfall.data.Store
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,6 +40,7 @@ object Preview {
     audio = manager
     focus = request
     val tonight = Store.get(context).tonight.value
+    Recordings.attach(context)
     engine = MixEngine(attributes).also {
       it.core.setLayers(listOf(layer))
       it.core.master = tonight.gain / 100f

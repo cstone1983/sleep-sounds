@@ -56,6 +56,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.cstone.nightfall.audio.Recordings
 import com.cstone.nightfall.connect.Connections
 import com.cstone.nightfall.connect.Reporter
 import com.cstone.nightfall.connect.Target
@@ -343,6 +344,7 @@ fun SettingsScreen() {
   var n8nHeader by remember { mutableStateOf(Connections.get(context, Connections.N8N_HEADER)) }
   var n8nValue by remember { mutableStateOf(Connections.get(context, Connections.N8N_VALUE)) }
   var remote by remember { mutableStateOf(Connections.remoteAllowed(context)) }
+  var recordings by remember { mutableStateOf(Recordings.wanted(context)) }
   var help by remember { mutableStateOf<Help?>(null) }
   fun toast(text: String) = Toast.makeText(context, text, Toast.LENGTH_LONG).show()
   fun test(target: Target?) {
@@ -379,6 +381,19 @@ fun SettingsScreen() {
       }
     }
     Text("When off, Home Assistant and n8n can't start or control Nightfall.", style = style(13, color = Muted))
+    Card(
+      Modifier.fillMaxWidth().heightIn(min = 64.dp),
+      onClick = {
+        recordings = !recordings
+        Recordings.setEnabled(context, recordings)
+      },
+    ) {
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Text("Use real recordings", Modifier.weight(1f), style = style(15, FontWeight.SemiBold))
+        Text(if (recordings) "Recorded" else "Generated", style = style(14, FontWeight.ExtraBold, if (recordings) Glow else Faint))
+      }
+    }
+    Text("Ocean, creek, fire, crickets, frogs, forest birds, wind in trees and rain on a tent are real recordings that repeat each minute. Switch this off to hear the generated versions, which never repeat. It applies from the next time a sound starts.", style = style(13, color = Muted))
     SectionHeading("Home Assistant", "How to connect Home Assistant") { help = Help.HOME_ASSISTANT }
     Field("Server URL", haUrl, "http://homeassistant.local:8123") { haUrl = it; Connections.set(context, Connections.HA_URL, it) }
     Field("Webhook ID", haWebhook, secret = true) { haWebhook = it; Connections.set(context, Connections.HA_WEBHOOK, it) }

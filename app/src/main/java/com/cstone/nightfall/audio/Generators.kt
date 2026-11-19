@@ -46,7 +46,8 @@ class Noise(private val colour: Colour, private val gain: Float) : Stereo() {
 
 /**
  * Rain is the patter of countless small drops plus the nearer ones you can pick out.
- * [density] is how many of the small ones land each second: fewer sounds sparser and more "pattery".
+ * [density] is how many of the small ones land each second. At 0 the patter is smooth noise, which
+ * is what's used: separate impacts came out sounding like crackle on a real phone.
  * The surface it lands on decides the rest: [bedLow] to [bedHigh] is the band of the hiss,
  * and the drops are noise bursts ([dropDull]) with an optional ring ([toneLow] to [toneHigh]).
  */
@@ -66,10 +67,11 @@ class Rain(
   private val rng = Rng()
   // The hiss is thousands of separate tiny impacts a second, not smooth noise: smooth noise is static.
   private val chance = density / SAMPLE_RATE
-  private val grain = kotlin.math.sqrt(0.95f / chance)
+  private val grain = if (chance > 0f) kotlin.math.sqrt(0.95f / chance) else 0f
   private val wash = Array(2) { Pink(rng) }
 
   private fun impacts(side: Int): Float {
+    if (chance <= 0f) return rng.bipolar()
     val far = wash[side].next() * 0.7f
     if (rng.unit() >= chance) return far
     val size = rng.unit()

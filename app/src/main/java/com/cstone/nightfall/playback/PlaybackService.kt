@@ -27,6 +27,7 @@ import android.util.Log
 import com.cstone.nightfall.MainActivity
 import com.cstone.nightfall.R
 import com.cstone.nightfall.audio.MixEngine
+import com.cstone.nightfall.audio.Recordings
 import com.cstone.nightfall.connect.Connections
 import com.cstone.nightfall.connect.Reporter
 import com.cstone.nightfall.connect.SpeakerSearch
@@ -118,6 +119,7 @@ class PlaybackService : Service() {
 
   private fun begin(intent: Intent?) {
     audio = getSystemService(AudioManager::class.java)
+    Recordings.attach(this)
     val store = Store.get(this)
     val tonight = store.tonight.value
     val mix = chooseMix(store, intent?.getStringExtra(EXTRA_MIX))

@@ -2,7 +2,7 @@
 
 An Android sleep sounds app that can start itself at bedtime, with optional Home Assistant and n8n connections.
 
-Status: early but usable. The app in `app/` has the Tonight screen, a mixer with 29 stereo sounds generated live on the phone, a sleep timer with fade, an optional phone volume for each start, saved mixes, a media notification, night dim, breathing, four guided sessions, a search for Wi-Fi and Bluetooth speakers, and optional Home Assistant and n8n connections. Sonos and DLNA speakers play a live stream from the phone.
+Status: early but usable. The app in `app/` has the Tonight screen, a mixer with 30 stereo sounds (22 generated live on the phone, 8 real recordings), a sleep timer with fade, an optional phone volume for each start, saved mixes, a media notification, night dim, breathing, four guided sessions, a search for Wi-Fi and Bluetooth speakers, and optional Home Assistant and n8n connections. Sonos and DLNA speakers play a live stream from the phone.
 
 Not built yet: Google Cast and AirPlay speakers, and widgets.
 
@@ -12,6 +12,7 @@ The app has no bedtime schedule of its own. Automatic starts come only from an o
 
 - `app/` is the Nightfall app.
 - `docs/AUTOMATION.md` covers commands, events and setup.
+- `recordings/` lists where the recorded sounds come from and holds the script that cuts them.
 - `guided/` holds the meditation scripts and the script that voices them.
 - `design/` holds the UI proposal.
 - `spike/autostart/` is the test app that proved auto-start on Android 17.

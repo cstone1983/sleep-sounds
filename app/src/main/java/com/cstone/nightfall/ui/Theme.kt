@@ -75,7 +75,7 @@ private val SOUND_COLOURS = mapOf(
   "ocean" to 0xFF4FC7E8, "creek" to 0xFF5FE0C4, "stream" to 0xFF7BE8A8, "waterfall" to 0xFF8AD8FF,
   "drip" to 0xFF7FB8E8, "cave" to 0xFF9AA6D8,
   "wind" to 0xFFB8E0E8, "trees" to 0xFF9BE08A, "fire" to 0xFFFFA05C, "crickets" to 0xFFD6E86A,
-  "frogs" to 0xFF7ED67A, "birds" to 0xFFFFD27A, "owls" to 0xFFE0B48A,
+  "frogs" to 0xFF7ED67A, "birds" to 0xFFFFD27A, "forest" to 0xFFB6E86A, "owls" to 0xFFE0B48A,
   "white" to 0xFFE8EAFF, "pink" to 0xFFFFA8D0, "brown" to 0xFFD9A47A, "fan" to 0xFFA8C8E8,
   "train" to 0xFFC8B0E8, "hum" to 0xFF9C8CFF,
   "bowls" to 0xFFFFC46A, "chimes" to 0xFFFFE08A, "drone" to 0xFFC49CFF, "heartbeat" to 0xFFFF8C9C,

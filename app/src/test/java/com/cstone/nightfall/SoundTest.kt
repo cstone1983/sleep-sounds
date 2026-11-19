@@ -21,7 +21,7 @@ import kotlin.math.sqrt
 class SoundTest {
   @Test
   fun everySoundIsAudibleBalancedAndStereo() {
-    assertEquals(29, SOUNDS.size)
+    assertEquals(30, SOUNDS.size)
     assertEquals(SOUNDS.size, SOUNDS.map { it.id }.toSet().size)
     val report = StringBuilder()
     Rng.fixedSeed = 20_261_118
@@ -64,7 +64,6 @@ class SoundTest {
       report.append("%-11s rms %.3f loudest %.3f peak %.2f alike %.2f dc %.4f spiky %.1f\n".format(sound.id, level, loudest, peak, alike, mean, spiky))
       // Rain is made of impacts, so it peaks higher for its loudness. The mixer rounds those off.
       if (peak >= (if (spiky > 5) 1.8f else 1.3f)) problems += "${sound.id} peaks at $peak"
-      if ((sound.id == "heavy_rain" || sound.id == "light_rain") && spiky < 4.5) problems += "${sound.id} is as smooth as static: $spiky"
       if (level <= 0.004f) problems += "${sound.id} is silent, rms=$level"
       if (loudest <= 0.05f) problems += "${sound.id} is too quiet at its loudest: $loudest"
       if (loudest >= 0.3f) problems += "${sound.id} is too loud at its loudest: $loudest"
