@@ -81,6 +81,7 @@ class Rain(
   private val rumbleCut = Array(2) { LowPass(320f) }
   private val swell = Wander(rng, 9f)
   private val lean = Wander(rng, 5f)
+  private val gust = Wander(rng, 1.6f)
   private val drops = Pings(rng, 14)
 
   override fun frame() {
@@ -93,7 +94,7 @@ class Rain(
       }
     }
     drops.step()
-    val level = bed * (0.75f + swell.next() * 0.5f)
+    val level = bed * (0.5f + swell.next() * 0.7f + gust.next() * 0.35f)
     val tilt = (lean.next() - 0.5f) * 0.25f
     val left = highCut[0].step(lowCut[0].step(impacts(0))) + rumbleCut[0].step(rumble[0].next()) * roar
     val right = highCut[1].step(lowCut[1].step(impacts(1))) + rumbleCut[1].step(rumble[1].next()) * roar
@@ -149,16 +150,26 @@ class Thunder : Stereo() {
   }
 }
 
-/** One breaker: it gathers, crashes, then drags back over the sand with a fizz. */
+/**
+ * One breaker: it gathers, crashes, then drags back over the sand.
+ * Surf is mostly low: the top end only opens up for the moment the wave breaks, and what's left
+ * afterwards is foam, which is countless small bubbles popping and not a steady hiss.
+ */
 private class Wave(private val rng: Rng, private val pan: Float) {
   private val body = Brown(rng)
-  private val bodyCut = Biquad().lowPass(420f)
+  private val bodyCut = Biquad().lowPass(380f)
   private val wash = Pink(rng)
-  private val washCut = Biquad().highPass(700f)
-  private val fizzCut = Biquad().highPass(5_500f)
+  private val washCut = Biquad().lowPass(600f, 0.6f)
+  private val washFloor = HighPass(140f)
+  private val churn = LowPass(9f)
+  private val foamCut = Biquad().bandPass(2_600f, 0.7f)
   private var position = rng.unit()
   private var step = 0f
   private var size = 1f
+  private var tick = 0
+  private var swell = 0f
+  private var bright = 0f
+  private var foam = 0f
   var left = 0f
   var right = 0f
 
@@ -176,27 +187,31 @@ private class Wave(private val rng: Rng, private val pan: Float) {
       again()
     }
     val t = position
-    val swell: Float
-    val bright: Float
-    val fizz: Float
-    if (t < 0.38f) {
-      val x = t / 0.38f
-      swell = x * x * x
-      bright = x * x * 0.5f
-      fizz = 0f
-    } else {
-      val x = (t - 0.38f) / 0.62f
-      swell = exp(-x * 5f)
-      bright = 0.5f + 0.5f * exp(-x * 9f)
-      fizz = x.coerceAtMost(0.08f) / 0.08f * exp(-x * 3.2f)
+    if (tick-- <= 0) {
+      tick = 64
+      if (t < 0.38f) {
+        val x = t / 0.38f
+        swell = x * x * x
+        bright = x * x * x * 0.6f
+        foam = 0f
+      } else {
+        val x = (t - 0.38f) / 0.62f
+        swell = exp(-x * 4.5f)
+        bright = 0.25f + 0.75f * exp(-x * 7f)
+        foam = x.coerceAtMost(0.06f) / 0.06f * exp(-x * 3.5f)
+      }
+      washCut.lowPass(450f + bright * bright * 3_800f * size, 0.6f)
     }
-    val value = (bodyCut.step(body.next()) * swell * 1.5f +
-      washCut.step(wash.next()) * swell * bright * 1.6f +
-      fizzCut.step(rng.bipolar()) * fizz * 0.22f) * size
+    // Water never moves smoothly: the roar is roughened a few times a second.
+    val rough = 0.55f + churn.step(abs(rng.bipolar())) * 0.9f
+    val pop = if (rng.unit() < 0.03f * foam) rng.bipolar() * 3f else 0f
+    val value = (bodyCut.step(body.next()) * swell * 1.6f +
+      washFloor.step(washCut.step(wash.next())) * swell * rough * 3.2f +
+      foamCut.step(pop) * 0.5f) * size
     // The crash sweeps a little along the beach.
-    val place = pan + (t - 0.5f) * 0.5f
-    left = value * panLeft(place.coerceIn(-1f, 1f))
-    right = value * panRight(place.coerceIn(-1f, 1f))
+    val place = (pan + (t - 0.5f) * 0.5f).coerceIn(-1f, 1f)
+    left = value * panLeft(place)
+    right = value * panRight(place)
   }
 }
 
@@ -245,7 +260,7 @@ class Water(
   override fun frame() {
     if (bubblesPerSecond > 0f && rng.chance(bubblesPerSecond)) {
       val small = rng.unit()
-      val hertz = bubbleLow + small * small * (bubbleHigh - bubbleLow)
+      val hertz = bubbleLow + small * kotlin.math.sqrt(small) * (bubbleHigh - bubbleLow)
       bubbles.take().fire(
         bubbleGain * rng.between(0.2f, 1f) * (1.2f - small),
         0.07f - small * 0.05f,
@@ -293,7 +308,7 @@ class Wind(private val leaves: Float) : Stereo() {
   private val howl = Array(2) { Biquad() }
   private val deep = Array(2) { Brown(rng) }
   private val deepCut = Array(2) { LowPass(140f) }
-  private val leafCut = Array(2) { Biquad().highPass(2_600f) }
+  private val leafCut = Array(2) { Biquad().bandPass(1_700f, 0.45f) }
   private val flutter = Array(2) { LowPass(18f) }
   private val strength = FloatArray(2)
   private var tick = 0
@@ -312,10 +327,10 @@ class Wind(private val leaves: Float) : Stereo() {
     }
     for (i in 0..1) {
       val s = strength[i]
-      var out = howl[i].step(air[i].next()) * (0.5f + s * 2.6f) + deepCut[i].step(deep[i].next()) * s * 0.5f
+      var out = howl[i].step(air[i].next()) * (0.2f + s * s * 3.6f) + deepCut[i].step(deep[i].next()) * s * 0.5f
       if (leaves > 0f) {
         val grain = flutter[i].step(abs(rng.bipolar())) * 2f
-        out = out * 0.45f + leafCut[i].step(rng.bipolar()) * grain * (0.12f + s * s) * leaves
+        out = out * 0.6f + leafCut[i].step(rng.bipolar()) * grain * (0.04f + s * s * 1.1f) * leaves
       }
       if (i == 0) l = out else r = out
     }
@@ -331,9 +346,9 @@ class Fire : Stereo() {
   private val sparks = Pings(rng, 12)
 
   override fun frame() {
-    if (rng.chance(11f)) {
-      val size = rng.unit().pow(5)
-      sparks.take().fire(0.05f + size * 0.75f, 0.002f + size * 0.012f, pan = rng.bipolar() * 0.75f, dull = rng.between(0.1f, 0.6f))
+    if (rng.chance(16f)) {
+      val size = rng.unit().pow(4)
+      sparks.take().fire(0.1f + size * 0.7f, 0.002f + size * 0.012f, pan = rng.bipolar() * 0.75f, dull = rng.between(0.1f, 0.6f))
     }
     if (rng.chance(0.45f)) {
       val pan = rng.bipolar() * 0.5f
@@ -341,8 +356,8 @@ class Fire : Stereo() {
       sparks.take().fire(0.3f, 0.004f, pan = pan)
     }
     sparks.step()
-    l = roarCut[0].step(roar[0].next()) * (0.55f + flicker[0].next() * 0.7f) + hissCut[0].step(rng.bipolar()) * 0.012f + sparks.left
-    r = roarCut[1].step(roar[1].next()) * (0.55f + flicker[1].next() * 0.7f) + hissCut[1].step(rng.bipolar()) * 0.012f + sparks.right
+    l = roarCut[0].step(roar[0].next()) * (0.2f + flicker[0].next() * 0.35f) + hissCut[0].step(rng.bipolar()) * 0.012f + sparks.left
+    r = roarCut[1].step(roar[1].next()) * (0.2f + flicker[1].next() * 0.35f) + hissCut[1].step(rng.bipolar()) * 0.012f + sparks.right
   }
 }
 
@@ -638,13 +653,13 @@ class Train : Stereo() {
       beat = (beat + 1) % 4
       wait = (SAMPLE_RATE * if (beat % 2 == 0) 0.6f else 0.17f).toInt()
       val pan = if (beat < 2) -0.35f else 0.35f
-      wheels.take().fire(0.3f, 0.07f, 150f, 0.99992f, pan, soft = 0.002f)
-      wheels.take().fire(0.22f, 0.035f, pan = pan, dull = 0.9f)
+      wheels.take().fire(0.7f, 0.08f, 150f, 0.99992f, pan, soft = 0.002f)
+      wheels.take().fire(0.6f, 0.04f, pan = pan, dull = 0.88f)
     }
     wheels.step()
     val level = 0.85f + sway.next() * 0.3f
-    l = (rumbleCut[0].step(rumble[0].next()) * 1.3f + rattle[0].step(rng.bipolar()) * 0.03f) * level + wheels.left
-    r = (rumbleCut[1].step(rumble[1].next()) * 1.3f + rattle[1].step(rng.bipolar()) * 0.03f) * level + wheels.right
+    l = (rumbleCut[0].step(rumble[0].next()) * 0.8f + rattle[0].step(rng.bipolar()) * 0.03f) * level + wheels.left
+    r = (rumbleCut[1].step(rumble[1].next()) * 0.8f + rattle[1].step(rng.bipolar()) * 0.03f) * level + wheels.right
   }
 }
 
